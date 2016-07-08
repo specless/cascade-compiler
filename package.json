@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/specless/specless-cascade.git"
+    "url": "git+https://github.com/specless/cascade-compiler.git"
   },
   "keywords": [
     "advertising",
@@ -19,9 +19,9 @@
   "author": "Stephen Corby",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/specless/specless-cascade/issues"
+    "url": "https://github.com/specless/cascade-compiler/issues"
   },
-  "homepage": "https://github.com/specless/specless-cascade#readme",
+  "homepage": "https://github.com/specless/cascade-compiler#readme",
   "dependencies": {
     "autoprefixer": "^6.3.6",
     "colors": "^1.1.2",
@@ -69,7 +69,7 @@
   },
   "specless-cascade": {
     "csfVersion": 623,
-    "path": null,
+    "path": "/Users/scorby/Desktop/updated-specless-cascade-app/app/compiler",
     "serverPort": 8787,
     "autoReload": {
       "all": true,
