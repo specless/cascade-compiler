@@ -39,7 +39,11 @@ gulp.task('listen', ['build'], function () {
 				src: prefix + '.html',
 				jsLocation: prefix + '.js',
 			}
-			previewObj.components.push(obj);
+			if (component.name === 'loader') {
+				previewObj.components.unshift(obj);
+			} else {
+				previewObj.components.push(obj);
+			}
 		});
 		previewObj = JSON.stringify(previewObj);
 		previewUrl = previewPrefix + previewObj;

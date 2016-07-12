@@ -5,10 +5,10 @@ var utils = require('../js/utils.js');
 module.exports = postcss.plugin('plugin-triggers', function (opts) {
 
 	opts = opts || {
-		pseudoPrefix : '::--ad-',
-		pseudoStatePrefix : ':--ad-',
-		elementPrefix : '::ad-',
-		propertyPrefix : '--ad-'
+		pseudoPrefix : '::-ad-',
+		pseudoStatePrefix : ':-ad-',
+		elementPrefix : '_ad-',
+		propertyPrefix : '-ad-'
 	}
 	var elements = utils.getPlugins('element');
 

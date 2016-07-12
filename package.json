@@ -1,6 +1,6 @@
 {
   "name": "@specless/cascade",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "Compiles Specless Cascade html5 responsive rich media ads.",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   "bugs": {
     "url": "https://github.com/specless/cascade-compiler/issues"
   },
-  "homepage": "https://github.com/specless/cascade-compiler#readme",
+  "homepage": "https://cascade.readme.io/docs",
   "dependencies": {
     "autoprefixer": "^6.3.6",
     "colors": "^1.1.2",
@@ -70,7 +70,7 @@
   "specless-cascade": {
     "csfVersion": 623,
     "path": "/Users/scorby/Desktop/updated-specless-cascade-app/app/compiler",
-    "serverPort": 8787,
+    "serverPort": "8787",
     "autoReload": {
       "all": true,
       "html": true,
@@ -79,8 +79,8 @@
       "assets": true
     },
     "pluginsFolder": "/plugins",
-    "userPluginsFolder": null,
-    "currentProjectDir": null,
+    "userPluginsFolder": "/Users/scorby/Library/Application Support/specless-cascade/Plugins",
+    "currentProjectDir": "/Users/scorby/Desktop/Cascade Projects/Inline Video Test",
     "buildDir": ".output",
     "publishDir": "./publish",
     "plugins": [

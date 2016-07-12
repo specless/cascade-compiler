@@ -144,7 +144,7 @@ module.exports = function (opts) {
 		var normalizeDeps = [];
 		_.each(normalize, function(element) {
 			tree.match({tag: element.tag}, function(node) {
-				normalizeDeps.push(cascade.path + normalizePath + '/' + element.css);
+				normalizeDeps.unshift(cascade.path + normalizePath + '/' + element.css);
 				return node;
 			})
 		});

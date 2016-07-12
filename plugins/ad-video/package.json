@@ -113,7 +113,7 @@
                         "selector": ".vjs-controls-enabled"
                     },
                     {
-                        "name": "simple-controls-enabled",
+                        "name": "simple-controls",
                         "selector": ".vjs-simple-controls"
                     },
                     {

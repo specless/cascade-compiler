@@ -27,7 +27,7 @@ gulp.task('css', function () {
     		path : settings.path
     	}),
     	require('../js/postcss-ad-elements')(),
-    	require('postcss-sassy-mixins')({silent: true}),
+    	require('postcss-sassy-mixins')({}),
     	require('postcss-simple-vars'),
     	require('postcss-atroot'),
     	require('postcss-simple-extend'),

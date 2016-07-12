@@ -137,20 +137,19 @@ html {
     min-height: 100%;
     height: 100%;
     overflow: hidden;
+}
 
-    * {
-    	-webkit-touch-callout: none;
-     	-webkit-user-select: none;
-     	-khtml-user-select: none;
-     	-moz-user-select: none;
-     	-ms-user-select: none;
-     	user-select: none;
-     	cursor: pointer;
-     	z-index: inherit;
-     	-webkit-highlight-color: rgba(0,0,0,0);
-      -webkit-tap-highlight-color: rgba(255, 255, 255, 0); 
-      -webkit-tap-highlight-color: transparent;
-    }
+body *, html * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    z-index: inherit;
+    -webkit-highlight-color: rgba(0,0,0,0);
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    -webkit-tap-highlight-color: transparent;
 }
 
 audio:not([controls]) {
@@ -294,4 +293,29 @@ textarea {
 
 optgroup {
   font-weight: bold;
+}
+
+/* <ad-loading-icon> */
+
+/* <ad-component> */
+
+[data-element='component'] {
+	display: block;
+	width: 100%;
+	height: 100%;
+	position:  fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	overflow: hidden;
+}
+
+/*a*/
+
+// Note: Assets are referenced using the following path: '/assets/your-file.png'
+
+.ad-container {
+	background-color: green;
+	color: red;
 }

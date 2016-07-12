@@ -2,7 +2,6 @@ module.exports = function (element, utils, _) {
     
     var videojsOptions = {
     	controls : false,
-    	autoplay : false,
     	preload : 'metadata',
         customControlsOnMobile: true,
         nativeControlsForTouch: false,
@@ -24,7 +23,8 @@ module.exports = function (element, utils, _) {
     	wallpaper: false,
     	aspect : '16x9',
     	audioHover : false, 
-    	viewToggleOff : false
+    	viewToggleOff : false,
+        autoplay: false,
     };
 
     var attrs = element.node.attrs;
@@ -39,6 +39,12 @@ module.exports = function (element, utils, _) {
     		videojsOptions[camelKey] = utils.normalizeAttrValue(attr);
     		delete attrs[key]
     	}
+        if (key === 'src') {
+            var urlTest = attr.split('youtube.com/watch');
+            if (urlTest.length > 1) {
+                elementOptions.playerType = 'youtube';
+            }
+        }
     });
     if (attrs['class']) {
         attrs['class'] = attrs['class'] + ' video-js';
