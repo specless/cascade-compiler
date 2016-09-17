@@ -38,6 +38,10 @@
                         "selector": ".vjs-play-control"
                     },
                     {
+                        "name": "mute-control",
+                        "selector": ".vjs-mute-control"
+                    },
+                    {
                         "name": "volume-control",
                         "selector": ".vjs-volume-menu-button"
                     },
@@ -67,7 +71,7 @@
                     },
                     {
                         "name": "load-progress",
-                        "selector": ".vjs-load-progress"
+                        "selector": ".vjs-progress-holder .vjs-load-progress"
                     },
                     {
                         "name": "play-progress-knob",
@@ -143,6 +147,47 @@
                         "mixinName": "ad-video-controls-accent-color"
                     }
                 ]
+            },
+            {
+                "name": "video-endframe",
+                "type": "element",
+                "newName": "video-endframe",
+                "tag": "div"
+            },
+            {
+                "name": "video-play",
+                "type": "attribute",
+                "newName": "ad-video-play"
+            },
+            {
+                "name": "video-pause",
+                "type": "attribute",
+                "newName": "ad-video-pause"
+            },
+            {
+                "name": "video-restart",
+                "type": "attribute",
+                "newName": "ad-video-restart"
+            },
+            {
+                "name": "video-unmute",
+                "type": "attribute",
+                "newName": "ad-video-unmute"
+            },
+            {
+                "name": "video-mute",
+                "type": "attribute",
+                "newName": "ad-video-mute"
+            },
+            {
+                "name": "video-play-toggle",
+                "type": "attribute",
+                "newName": "ad-video-play-toggle"
+            },
+            {
+                "name": "video-mute-toggle",
+                "type": "attribute",
+                "newName": "ad-video-mute-toggle"
             }
         ]
     }

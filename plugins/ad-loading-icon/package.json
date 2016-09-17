@@ -11,7 +11,13 @@
                 "dependencies": {
                     "css": ["styles.css"],
                     "js": []
-                }
+                },
+                "properties": [
+                    {
+                        "name": "color",
+                        "mixinName": "ad-loading-icon-color"
+                    }
+                ]
             }
         ]
     }

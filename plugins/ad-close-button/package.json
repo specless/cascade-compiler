@@ -11,7 +11,17 @@
                 "dependencies": {
                     "css": ["styles.css"],
                     "js": []
-                }
+                },
+                "properties": [
+                    {
+                        "name": "accent-color",
+                        "mixinName": "ad-close-button-foreground"
+                    },
+                    {
+                        "name": "color",
+                        "mixinName": "ad-close-button-background"
+                    }
+                ]
             }
         ]
     }
