@@ -30,8 +30,8 @@ module.exports = function (element, utils, _) {
         panorama: false
     };
 
-    var copyTo = utils.get('projectSettings');
-    var copyFrom = utils.get('cascadeSettings');
+    var copyTo = utils.compilerSettings.copy();
+    var copyFrom = utils.compilerSettings.copy();
 
     var attrs = element.node.attrs;
 
@@ -86,8 +86,8 @@ module.exports = function (element, utils, _) {
     if (elementOptions.panorama === true) {
         attrs['data-pano-src'] = '/assets/360-video-wrapper.html';
         element.jsDependencies.push('ad-video-panorama');
-        var copyTo = utils.get('projectSettings').path + '/assets/360-video-wrapper.html';
-        var copyFrom = utils.get('cascadeSettings').path + '/plugins/ad-video/360-video-wrapper.html';
+        var copyTo = utils.compilerSettings.copy().path + '/assets/360-video-wrapper.html';
+        var copyFrom = utils.compilerSettings.copy().path + '/plugins/ad-video/360-video-wrapper.html';
         fs.createReadStream(copyFrom).pipe(fs.createWriteStream(copyTo));
         videojsOptions.plugins.speclessPanoPlayer = {}
     }

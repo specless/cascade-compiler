@@ -18,24 +18,23 @@ var through = require('through2');
 var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 gulp.task('reload', ['recompile'], function () {
-    io.emit('reload', utils.readProjectSettings());
+    io.emit('reload', utils.projectSettings.copy());
 });
 gulp.task('recompile', function () {
     runSequence('html', ['css', 'js']);
 });
 var currentData;
 gulp.task('reload-css', function () {
-    currentData = utils.readProjectSettings().components;
+    currentData = utils.projectSettings.copy();
     runSequence('css', 'emit-reload');
 });
 gulp.task('emit-reload', ['recompile'], function () {
-    var updatedData = utils.readProjectSettings().components;
-    // Convert to strings, so we can compare two large objects
-    if (JSON.stringify(updatedData) == JSON.stringify(currentData)) {
-        io.emit('reload-css', utils.readProjectSettings());
-    } else {
-        io.emit('reload', utils.readProjectSettings());
+    var updatedData = utils.projectSettings.copy();
+    var message = 'reload';
+    if (_.isEqual(currentData.components, updatedData.components)) {
+        message = 'reload-css';
     }
+    io.emit('reload', utils.projectSettings.copy());
 });
 var gutil = require('gulp-util');
 var string_src = function (filename, string) {
@@ -55,8 +54,8 @@ var string_src = function (filename, string) {
 };
 gulp.task('listen', ['build'], function () {
     utils.sendMessage("Command Received: Start Server and Listen for Changes", null, 1);
-    var cascade = utils.get('cascadeSettings');
-    var settings = utils.readProjectSettings();
+    var cascade = utils.compilerSettings.copy();
+    var settings = utils.projectSettings.copy();
     var cascade_settings = require('../settings');
     var htmlFiles = [settings.path + '/**/' + cascade.html.fileName, '!' + settings.path + '/{' + cascade.assetsDirName + ',' + cascade.assetsDirName + '/**}'];
     var cssFiles = [settings.path + '/**/' + cascade.css.fileName, '!' + settings.path + '/{' + cascade.assetsDirName + ',' + cascade.assetsDirName + '/**}'];
@@ -70,7 +69,7 @@ gulp.task('listen', ['build'], function () {
         io.emit('reload-asset', {
             event: event,
             path: path,
-            project: utils.readProjectSettings()
+            project: utils.projectSettings.copy()
         });
     });
     app.use(function (req, res, next) {
@@ -83,7 +82,7 @@ gulp.task('listen', ['build'], function () {
         var width = 300;
         var height = 250;
         var previewPrefix = 'http://app.specless.io/preview/' + cascade.csfVersion + '?ad=000000&width=' + width + '&height=' + height + '#';
-        var projectSettings = utils.readProjectSettings();
+        var projectSettings = utils.projectSettings.copy();
         var previewObj = {
             unfriendlyCreative: true,
             components: []
@@ -133,7 +132,7 @@ gulp.task('listen', ['build'], function () {
         return ejs.renderFile(path.join(cascade.currentProjectDir, '.output/', component + '.html'), {
             url: 'http://localhost:8787/',
             component: component
-            // paths: paths('http://localhost:8787/')
+                // paths: paths('http://localhost:8787/')
         }, function (e) {
             return fn && fn.apply(this, arguments);
         });
@@ -244,7 +243,7 @@ gulp.task('listen', ['build'], function () {
     app.post('/compiler/css', function (req, res, next) {
         var string = req.body && req.body.string;
         var utils = require('../js/utils.js');
-        var cascade = utils.get('cascadeSettings');
+        var cascade = utils.compilerSettings.copy();
         var plumber = require('gulp-plumber');
         // var glob = require('glob');
         // var new_stream = new stream.Readable(new Buffer(string));
@@ -259,8 +258,6 @@ gulp.task('listen', ['build'], function () {
                 stack: err
             }));
         }).pipe(through.obj(function (file, enc, cb) {
-            // console.dir(file);
-            // file.contents = file.contents.pipe(prefixStream(prefixText));
             var compiledcss = file._contents.toString();
             var imports = [{
                 css: []

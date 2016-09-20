@@ -1,153 +1,129 @@
 var _ = require('underscore');
 var fs = require('fs');
+var path = require('path');
 var jetpack = require('fs-jetpack');
 var colors = require('colors');
 var directoryTree = require('directory-tree').directoryTree;
 var globalSettings = jetpack.read('./package.json', 'json');
-var cascadeSettings = globalSettings['specless-cascade'];
+// var compilerSettings = globalSettings['specless-cascade'];
+var compilerSettings = require(path.join(process.cwd(), 'settings/index.json'));
 var stripSync = require("strip-css-singleline-comments/sync");
 var settings = require('../settings');
-module.exports = {
-    currentProject: function () {
-        var cascade = jetpack.read('./package.json', 'json')['specless-cascade'];
-        if (cascade.currentProjectDir === 'default') {
-            return cascade.path + cascade.defaultProjectDir;
+var projectSettings = {};
+var deepExtend = _.deepExtend = function (target_, source) {
+    var target = target_;
+    if (!target) {
+        target = {};
+    }
+    _.each(source, function (value, prop) {
+        if (_.isObject(target[prop]) && !Array.isArray(target[prop])) {
+            deepExtend(target[prop], value);
         } else {
-            return cascade.currentProjectDir;
+            target[prop] = value;
         }
-    },
-    setCurrentProject: function (path) {
-        var currentSettings = jetpack.read('./package.json', 'json');
-        currentSettings['specless-cascade'].currentProjectDir = path;
-        jetpack.write('./package.json', currentSettings);
-    },
-    readProjectSettings: function () {
-        var projectFolder = this.currentProject();
-        // var result;
-        // if (type === 'projectSettings' && projectFolder !== null) {
-        var result = jetpack.read(projectFolder + '/' + cascadeSettings.settingsFileName, 'json');
-        // Rebuild the settings object if it doesn't exist
-        if (result === null || JSON.stringify(result) === '{}') {
-            result = {
-                path: projectFolder,
-                name: projectFolder.split('/').pop(),
-                cascadeVersion: globalSettings.version,
-                created: this.timestamp(),
-                lastUpdated: this.timestamp(),
-                csfVersion: cascadeSettings.csfVersion,
-                components: [],
-            };
-        }
-        return result;
-    },
-    writeProjectSettings: function (settings) {
-        var projectFolder = this.currentProject();
-        settings.lastUpdated = this.timestamp();
-        settings.cascadeVersion = jetpack.read('./package.json', 'json').version;
-        jetpack.write(projectFolder + '/' + cascadeSettings.settingsFileName, settings);
-    },
-    get: function (type) {
-        var projectFolder = this.currentProject();
-        var result;
-        if (type === 'projectSettings' && projectFolder !== null) {
-            result = jetpack.read(projectFolder + '/' + cascadeSettings.settingsFileName, 'json');
-            // Rebuild the settings object if it doesn't exist
-            // console.log(result);
-            if (result === null) {
-                result = {
-                    path: projectFolder,
-                    name: projectFolder.split('/').pop(),
-                    cascadeVersion: globalSettings.version,
-                    created: this.timestamp(),
-                    lastUpdated: this.timestamp(),
-                    csfVersion: cascadeSettings.csfVersion,
-                    components: [],
-                };
+    });
+    return target;
+};
+module.exports = {
+    // currentProject: ,
+    projectSettings: {
+        folder: function () {
+            if (compilerSettings.currentProjectDir === 'default') {
+                return compilerSettings.path + compilerSettings.defaultProjectDir;
+            } else {
+                return compilerSettings.currentProjectDir;
             }
-            return result;
-        } else if (type === 'cascadeSettings') {
-            result = jetpack.read('./package.json', 'json');
-            result = result['specless-cascade'];
-            return result;
+        },
+        settings: function () {
+            return this.folder() + '/' + compilerSettings.settingsFileName;
+        },
+        get: function (key) {
+            return projectSettings[key];
+        },
+        remove: function (key) {
+            delete projectSettings[key];
+        },
+        copy: function () {
+            return JSON.parse(JSON.stringify(projectSettings));
+        },
+        set: function (extension) {
+            extension.lastUpdated = new Date();
+            _.extend(projectSettings, extension);
+        },
+        read: function () {
+            projectSettings = jetpack.read(this.settings(), 'json');
+        },
+        write: function () {
+            jetpack.write(this.settings(), projectSettings);
         }
     },
-    save: function (type, object) {
-        var projectFolder = this.currentProject();
-        if (type === 'projectSettings') {
-            object.lastUpdated = this.timestamp();
-            object.cascadeVersion = jetpack.read('./package.json', 'json').version;
-            jetpack.write(projectFolder + '/' + cascadeSettings.settingsFileName, object);
-            this.sendMessage("Project settings updated.", null, 2);
-            return object;
+    compilerSettings: {
+        get: function (key) {
+            return compilerSettings[key];
+        },
+        copy: function () {
+            return JSON.parse(JSON.stringify(compilerSettings));
+        },
+        set: function (extension) {
+            _.extend(compilerSettings, extension);
+            this.write();
+        },
+        file: function () {
+            return './settings/index.json';
+        },
+        read: function () {
+            compilerSettings = jetpack.read(this.file(), 'json');
+        },
+        write: function () {
+            jetpack.write(this.file(), compilerSettings);
         }
-    },
-    wipeComponents: function () {
-        var settings = this.get('projectSettings');
-        delete settings.components;
-        this.save('projectSettings', settings);
     },
     component: function (component, fn) {
-        var settingsObj = this.get('projectSettings');
-        if (settingsObj.components === undefined) {
-            settingsObj.components = [];
-        }
-        // var foundComponent = false;
-        var foundComponent = _.find(settingsObj.components, function (com) {
+        var settings = this.projectSettings.copy();
+        var components = settings.components || [];
+        var foundComponent = _.find(settings.components, function (com) {
             return com.name === component;
         });
         if (!foundComponent) {
             foundComponent = {
                 name: component,
-                // html: {},
-                // css: {},
-                // js: {},
                 imports: []
             };
-            settingsObj.components.push(foundComponent);
+            components.push(foundComponent);
         }
         if (fn) {
             fn(foundComponent);
-            settingsObj.lastUpdated = this.timestamp();
-            this.save('projectSettings', settingsObj);
+            this.projectSettings.set({
+                components: components
+            });
         }
         return foundComponent;
     },
     dumpSettings: function (dump) {
-        var settings = this.readProjectSettings();
+        var components = this.projectSettings.copy().components;
         _.each(dump && dump.components, function (data, key) {
-            var com = _.find(settings.components, function (com) {
+            var com = _.find(components, function (com) {
                 return com.name === key;
             });
-            if (!settings.components) {
-                settings.components = [];
+            if (!components) {
+                components = [];
             }
             if (!com) {
                 com = {
                     name: key
                 };
-                settings.components.push(com);
+                components.push(com);
             }
             _.extend(com, data);
-            //
         });
-        this.writeProjectSettings(settings);
-        // var clone = JSON.stringify(dump);
-        // console.log(clone);
-        // var components = foldl(clone.components, function (key) {}, []);
-        // delete clone.components;
+        dump.components = components;
+        this.projectSettings.set(dump);
     },
     makeComponent: function (dump, com) {
         var components = dump.components = dump.components || {};
         var comp = components[com] = components[com] || {};
         return comp;
     },
-    // logContexts: function (com, dump, contexts) {
-    //     var comp = this.makeComponent(dump, com);
-    //     var com_contexts = component.contexts = component.contexts || {};
-    //     _.each(contexts, function (list, key) {
-    //         com_contexts[key] = (com_contexts[key] ? _.uniq(com_contexts[key].concat(list)) : list);
-    //     });
-    // },
     logComponentDetails: function (component_name, sourceType, logAs, value) {
         this.component(component_name, function (component) {
             component[sourceType][logAs] = value;
@@ -155,40 +131,30 @@ module.exports = {
     },
     timestamp: function () {
         return new Date();
-        // bad - don't ever do this again
-        // var hour = date.getHours();
-        // hour = (hour < 10 ? "0" : "") + hour;
-        // var min = date.getMinutes();
-        // min = (min < 10 ? "0" : "") + min;
-        // var sec = date.getSeconds();
-        // sec = (sec < 10 ? "0" : "") + sec;
-        // var year = date.getFullYear();
-        // var month = date.getMonth() + 1;
-        // month = (month < 10 ? "0" : "") + month;
-        // var day = date.getDate();
-        // day = (day < 10 ? "0" : "") + day;
-        // return year + ":" + month + ":" + day + ":" + hour + ":" + min + ":" + sec;
-    },
-    updateCascadePath: function (path) {
-        var packageJson = jetpack.read('./package.json', 'json');
-        packageJson["specless-cascade"].path = path;
-        jetpack.write('./package.json', packageJson);
     },
     openProject: function (path, callback) {
-        var settings, cascade;
+        var folder, settings, cascade;
         if (this.validateProject(path) === true) {
-            settings = this.get('projectSettings');
-            cascade = this.get('cascadeSettings');
-            this.setCurrentProject(path);
-            settings.path = this.currentProject();
-            settings.name = this.currentProject().split('/').pop();
-            this.save('projectSettings', settings);
+            // settings = this.get('projectSettings');
+            // settings = this.projectSettings.copy();
+            cascade = this.compilerSettings.copy();
+            folder = this.projectSettings.folder();
+            this.projectSettings.set({
+                currentProjectDir: path,
+                path: folder,
+                name: folder.split('/').pop()
+            });
+            // settings.path = this.projectSettings.folder();
+            // settings.name = this.projectSettings.folder().split('/').pop();
+            // this.projectSettings.set(settings);
             if (callback) {
                 callback(true);
             }
         } else {
             this.logError('Error opening this project', "The project located at '" + path + "' is not a valid Specless Cascade project. Default project opened instead.");
-            this.setCurrentProject(cascade.path + cascade.defaultProjectDir);
+            this.projectSettings.set({
+                currentProjectDir: compilerSettings.path + compilerSettings.defaultProjectDir
+            });
             if (callback) {
                 callback(false);
             }
@@ -196,17 +162,17 @@ module.exports = {
     },
     validateProject: function (path) {
         var directory = directoryTree(path);
-        var project = this.get('projectSettings');
-        var cascade = this.get('cascadeSettings');
+        var project = this.projectSettings.copy();
+        var cascade = this.compilerSettings.copy();
         // Check for an assets folder, settings file and at least one component;
         var hasAssets;
         var hasSettings;
         var components = [];
-        var assetsDir = cascade.assetsDirName;
-        var componentHtml = cascade.html.fileName;
-        var componentCss = cascade.css.fileName;
+        var assetsDir = compilerSettings.assetsDirName;
+        var componentHtml = compilerSettings.html.fileName;
+        var componentCss = compilerSettings.css.fileName;
         var componentJs = settings.js.fileName;
-        var settingsPath = cascade.settingsFileName;
+        var settingsPath = compilerSettings.settingsFileName;
         try {
             _.each(directory.children, function (child) {
                 var hasHtml, hasCss, hasJs, oldPath, newPath, cssFile;
@@ -246,7 +212,7 @@ module.exports = {
                     hasSettings = true;
                 } else if (child.name === "_global.scss") {
                     oldPath = path + '/' + child.path;
-                    newPath = path + '/' + child.path.replace('_global.scss', cascade.css.globalFileName);
+                    newPath = path + '/' + child.path.replace('_global.scss', compilerSettings.css.globalFileName);
                     fs.renameSync(oldPath, newPath);
                     cssFile = jetpack.read(newPath);
                     cssFile = cssFile.replace('// Define Global Variables', '');
@@ -258,6 +224,7 @@ module.exports = {
                 }
             });
         } catch (error) {
+            console.error(error);
             return false;
         }
         if (hasAssets === true && components.length > 0) {
@@ -274,18 +241,19 @@ module.exports = {
         console.log('');
     },
     copyToPublishFolder: function () {
-        var project = this.get('projectSettings');
-        var cascade = this.get('cascadeSettings');
+        var project = this.projectSettings.copy();
+        var cascade = this.compilerSettings.copy();
+        var folder = this.projectSettings.folder();
         _.each(project.components, function (component) {
-            jetpack.copy(project.path, cascade.publishDir, {
+            jetpack.copy(project.path, compilerSettings.publishDir, {
                 overwrite: 'yes'
             });
-            var htmlFile = jetpack.read(cascade.buildDir + '/' + component.name + '/' + cascade.html.fileName);
-            var cssFile = jetpack.read(cascade.buildDir + '/' + component.name + '/' + cascade.css.fileName);
-            var jsFile = jetpack.read(cascade.buildDir + '/' + component.name + '/' + cascade.js.fileName);
-            jetpack.write(cascade.publishDir + '/' + cascade.publishCompiledDirName + '/' + component.name + '.html', htmlFile);
-            jetpack.write(cascade.publishDir + '/' + cascade.publishCompiledDirName + '/' + component.name + '.css', cssFile);
-            jetpack.write(cascade.publishDir + '/' + cascade.publishCompiledDirName + '/' + component.name + '.js', jsFile);
+            var htmlFile = jetpack.read(folder + compilerSettings.buildDir + '/' + component.name + '/' + compilerSettings.html.fileName);
+            var cssFile = jetpack.read(folder + compilerSettings.buildDir + '/' + component.name + '/' + compilerSettings.css.fileName);
+            var jsFile = jetpack.read(folder + compilerSettings.buildDir + '/' + component.name + '/' + compilerSettings.js.fileName);
+            jetpack.write(folder + compilerSettings.publishDir + '/' + compilerSettings.publishCompiledDirName + '/' + component.name + '.html', htmlFile);
+            jetpack.write(folder + compilerSettings.publishDir + '/' + compilerSettings.publishCompiledDirName + '/' + component.name + '.css', cssFile);
+            jetpack.write(folder + compilerSettings.publishDir + '/' + compilerSettings.publishCompiledDirName + '/' + component.name + '.js', jsFile);
         });
     },
     sendMessage: function (message, details, code) {
@@ -317,8 +285,9 @@ module.exports = {
         return require('event-stream').map(transform);
     },
     getPlugins: function (type) {
-        var plugins = this.get('cascadeSettings').plugins;
-        var pluginsDir = this.get('cascadeSettings').pluginsFolder + '/';
+        var settings = this.compilerSettings.copy();
+        var plugins = settings.plugins;
+        var pluginsDir = settings.pluginsFolder + '/';
         var matches = [];
         _.each(plugins, function (plugin) {
             var pluginSettings = jetpack.read('.' + pluginsDir + plugin + '/package.json', 'json')['specless-cascade-plugin'];
@@ -338,18 +307,18 @@ module.exports = {
         return matches;
     },
     addDeps: function (object, newObject, basePath) {
-        var cascade = this.get('cascadeSettings');
-        var whiteList = cascade.js.whiteListedDeps;
+        var cascade = this.compilerSettings.copy();
+        var whiteList = compilerSettings.js.whiteListedDeps;
         if (newObject) {
             if (newObject.css) {
                 _.each(newObject.css, function (dep) {
-                    object.css.push(cascade.path + basePath + '/' + dep);
+                    object.css.push(compilerSettings.path + basePath + '/' + dep);
                     object.css = _.uniq(object.css);
                 });
             }
             if (newObject.jsPlugins) {
                 _.each(newObject.jsPlugins, function (dep) {
-                    object.jsPlugins.push(cascade.path + basePath + '/' + dep);
+                    object.jsPlugins.push(compilerSettings.path + basePath + '/' + dep);
                     object.jsPlugins = _.uniq(object.jsPlugins);
                 });
             }
@@ -367,9 +336,9 @@ module.exports = {
                         var depPath = basePath + '/' + dep;
                         var projectTest = depPath.split("$$$PROJECT$$$");
                         if (projectTest.length > 1) {
-                            depPath = cascade.currentProjectDir + projectTest[1];
+                            depPath = compilerSettings.currentProjectDir + projectTest[1];
                         } else {
-                            depPath = cascade.path + depPath;
+                            depPath = compilerSettings.path + depPath;
                         }
                         object.js.push(depPath);
                         object.js = _.uniq(object.js);

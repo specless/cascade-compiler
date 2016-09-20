@@ -18,7 +18,9 @@ gulp.task('set-project', function () {
     // console.log(argv.path);
     path = argv.path;
     if (utils.validateProject(path) === true) {
-        utils.setCurrentProject(path);
+        utils.compilerSettings.set({
+            currentProjectDir: path
+        });
         utils.sendMessage("The project located at '" + path + "' is a valid Cascade project.", null, 2);
         utils.sendMessage("Current project directory set to: '" + path + "'.", null, 0);
         utils.sendMessage("Command Completed: Set Project Directory", null, 1);

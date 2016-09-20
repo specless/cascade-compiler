@@ -70,7 +70,7 @@ $myvar: 100px;
             }
         }
 
-        @time (year is whatever) {
+        @time (year: whatever) {
             whatever: whatever;
         }
 

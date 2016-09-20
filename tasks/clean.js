@@ -7,10 +7,9 @@ gulp.task('clean', function () {
     var messageLog = './message-log.json';
     jetpack.write(messageLog, '[]');
     utils.sendMessage("Command Received: Clean Output Directory", null, 1);
-    var cascade = utils.get('cascadeSettings');
-    var project = utils.get('projectSettings');
+    var cascade = utils.compilerSettings.copy();
     var success = true;
-    return gulp.src([project.path + '/' + cascade.buildDir, cascade.publishDir], {
+    return gulp.src([utils.projectSettings.folder() + '/' + cascade.buildDir, cascade.publishDir], {
         read: false
     }).pipe(plumber({
         errorHandler: function (error) {

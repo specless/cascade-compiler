@@ -2,8 +2,8 @@ var postcss = require('postcss');
 var _ = require('underscore');
 var utils = require('../js/utils.js');
 module.exports = postcss.plugin('plugin-custom-imports', function () {
-    var cascade = utils.get('cascadeSettings');
-    var project = utils.get('projectSettings');
+    var cascade = utils.compilerSettings.copy();
+    var project = utils.compilerSettings.copy();
     return function (css, result) {
         // var pathArray = css.source.input.file.split('/');
         // var file = {

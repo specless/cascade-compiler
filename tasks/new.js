@@ -7,7 +7,7 @@ var jetpack = require('fs-jetpack');
 var plumber = require('gulp-plumber');
 
 gulp.task('new', function () {
-	var cascade = utils.get('cascadeSettings');
+	var cascade = utils.compilerSettings.copy();
 	utils.sendMessage("Command Received: Create New Project", null, 1);
 
 	var argv = require('yargs')

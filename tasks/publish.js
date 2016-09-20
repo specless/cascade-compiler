@@ -4,8 +4,8 @@ var zip = require('gulp-zip');
 var plumber = require('gulp-plumber');
 gulp.task('publish', ['build'], function () {
     utils.sendMessage("Command Received: Publish Project.", null, 1);
-    var cascade = utils.get('cascadeSettings');
-    var project = utils.get('projectSettings');
+    var cascade = utils.compilerSettings.copy();
+    var project = utils.compilerSettings.copy();
     var success = true;
     return gulp.src([project.path + '/**/*', '!' + project.path + '/*.scc'], {
         dot: true

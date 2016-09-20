@@ -1,0 +1,188 @@
+{
+  "version": "1.0.12",
+  "useUserPluginsFolder": false,
+  "csfVersion": 624,
+  "path": "/Users/michaelmclaughlin/Sites/specless/compiler",
+  "serverPort": "8787",
+  "autoReload": {
+    "all": true,
+    "html": true,
+    "css": true,
+    "js": true,
+    "assets": true
+  },
+  "pluginsFolder": "/plugins",
+  "userPluginsFolder": "/Users/scorby/Library/Application Support/specless-cascade/Plugins",
+  "currentProjectDir": "/Users/michaelmclaughlin/Sites/specless/ads/dev_624",
+  "buildDir": ".output",
+  "publishDir": "./publish",
+  "plugins": [
+    "ad-video",
+    "ad-component",
+    "ad-close-button",
+    "ad-loading-icon"
+  ],
+  "publishCompiledDirName": ".output",
+  "macIconPath": "/project-folder.icns",
+  "newProjectDir": "/projects/new",
+  "defaultProjectDir": "/projects/default",
+  "errorProjectDir": "/projects/error",
+  "settingsFileName": "ad.json",
+  "assetsDirName": "assets",
+  "supportedAssets": [
+    "png",
+    "jpg",
+    "jpeg",
+    "gif",
+    "webp",
+    "tif",
+    "tiff",
+    "bmp",
+    "svg",
+    "mp4",
+    "ogg",
+    "wav",
+    "mp3",
+    "jsv",
+    "js",
+    "html",
+    "css",
+    "json",
+    "xsl",
+    "xslx",
+    "csv",
+    "pdf"
+  ],
+  "componentDirNamePrefix": "",
+  "css": {
+    "fileName": "index.css",
+    "templateFilePath": "/css/base.css",
+    "globalFileName": "global-styles.css",
+    "syntax": {
+      "contexts": [
+        "time",
+        "environment",
+        "location",
+        "user",
+        "input",
+        "device",
+        "site",
+        "format",
+        "layout",
+        "custom",
+        "panel"
+      ],
+      "contextOperators": [
+        ":",
+        ">=",
+        "<=",
+        "=="
+      ],
+      "attrPrefix": "[data-",
+      "attrJoiner": "~=\"",
+      "attrExplicitJoiner": "=\"",
+      "attrEnding": "\"]",
+      "flowlane": "flowlane",
+      "flowlaneProperties": [
+        "min-width",
+        "max-width",
+        "min-scale",
+        "max-scale"
+      ],
+      "flowlaneDefaults": {
+        "breakpoints": [],
+        "min-width": 0,
+        "max-width": 10000,
+        "min-scale": 0,
+        "max-scale": 1000
+      },
+      "flowlaneDefine": "define-flowlane",
+      "breakpoint": "breakpoint",
+      "defaultBreakpointType": "max"
+    },
+    "normalizeDir": "/css/normalize",
+    "normalize": [
+      {
+        "tag": "div",
+        "css": "a.css"
+      }
+    ]
+  },
+  "html": {
+    "fileName": "index.html",
+    "templateFilePath": "/templates/component.html",
+    "syntax": {
+      "prefix": "ad-",
+      "attributeFinalPrefix": "data-"
+    }
+  },
+  "js": {
+    "plugins": [
+      {
+        "name": "videojs",
+        "url": "https://vjs.zencdn.net/5.8.8/video.min.js"
+      },
+      {
+        "name": "jquery",
+        "url": "https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"
+      },
+      {
+        "name": "greensock-tweenlite",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.2/TweenLite.min.js"
+      },
+      {
+        "name": "greensock-tweenmax",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.2/TweenMax.min.js"
+      },
+      {
+        "name": "greensock-cssplugin",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.2/plugins/CSSPlugin.min.js"
+      },
+      {
+        "name": "greensock-easepack",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.2/easing/EasePack.min.js"
+      },
+      {
+        "name": "greensock-timelinelite",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.2/TimelineLite.min.js"
+      },
+      {
+        "name": "greensock-timelinemax",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.2/TimelineMax.min.js"
+      },
+      {
+        "name": "createjs",
+        "url": "https://code.createjs.com/createjs-2015.11.26.min.js"
+      },
+      {
+        "name": "swiper",
+        "url": "csfplugins_623_vendor_swiper"
+      },
+      {
+        "name": "ad-video",
+        "url": "csfplugins_623_ad-video"
+      },
+      {
+        "name": "ad-video-tracking",
+        "url": "csfplugins_623_ad-video-tracking"
+      },
+      {
+        "name": "ad-video-youtube",
+        "url": "csfplugins_623_ad-video-youtube"
+      },
+      {
+        "name": "ad-video-inline",
+        "url": "csfplugins_623_ad-video-inline"
+      },
+      {
+        "name": "ad-video-panorama",
+        "url": "csfplugins_623_ad-video-panorama"
+      }
+    ],
+    "fileName": "index.js",
+    "templateFilePath": "/templates/component.js",
+    "syntax": {
+      "adObject": "ad"
+    }
+  }
+}

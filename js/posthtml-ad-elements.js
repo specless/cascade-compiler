@@ -7,7 +7,7 @@ module.exports = function (opts) {
     };
     var elements = utils.getPlugins('element');
     var attrs = utils.getPlugins('attribute');
-    var cascade = utils.get('cascadeSettings');
+    var cascade = utils.compilerSettings.copy();
     var normalizePath = cascade.css.normalizeDir;
     var normalize = cascade.css.normalize;
     return function (tree) {

@@ -20,11 +20,6 @@
     "details": null
   },
   {
-    "message": "Project settings updated.",
-    "code": 2,
-    "details": null
-  },
-  {
     "message": "Project opened successfully.",
     "code": 2,
     "details": null
@@ -40,6 +35,16 @@
     "details": null
   },
   {
+    "message": "Command Received: Compile Javascript",
+    "code": 1,
+    "details": null
+  },
+  {
+    "message": "Command Received: Compile CSS",
+    "code": 1,
+    "details": null
+  },
+  {
     "message": "HTML Compiled successfully.",
     "code": 4,
     "details": null
@@ -50,37 +55,22 @@
     "details": null
   },
   {
-    "message": "Command Received: Compile CSS",
-    "code": 1,
-    "details": null
-  },
-  {
-    "message": "Command Received: Compile Javascript",
-    "code": 1,
-    "details": null
-  },
-  {
-    "message": "Project settings updated.",
-    "code": 2,
-    "details": null
-  },
-  {
-    "message": "Project settings updated.",
-    "code": 2,
-    "details": null
-  },
-  {
-    "message": "Project settings updated.",
-    "code": 2,
-    "details": null
-  },
-  {
     "message": "Javascript Compiled successfully.",
     "code": 4,
     "details": null
   },
   {
     "message": "Command Completed: Compile Javascript",
+    "code": 1,
+    "details": null
+  },
+  {
+    "message": "CSS Compiled successfully.",
+    "code": 4,
+    "details": null
+  },
+  {
+    "message": "Command Completed: Compile CSS",
     "code": 1,
     "details": null
   },
@@ -107,16 +97,6 @@
   {
     "message": "Server: Listening On Port: 8787",
     "code": 2,
-    "details": null
-  },
-  {
-    "message": "CSS Compiled successfully.",
-    "code": 4,
-    "details": null
-  },
-  {
-    "message": "Command Completed: Compile CSS",
-    "code": 1,
     "details": null
   }
 ]

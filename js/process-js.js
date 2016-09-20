@@ -4,20 +4,20 @@ var utils = require('../js/utils.js');
 var jetpack = require('fs-jetpack');
 var Handlebars = require("handlebars");
 module.exports = function () {
-    var cascade = utils.get('cascadeSettings');
-    var project = utils.get('projectSettings');
-
+    // var cascade = utils.compilerSettings.copy();
+    // var project = utils.compilerSettings.copy();
     function transform(file, cb) {
-        var settings = require('../settings');
+        var cascade = require('../settings');
+        var project = utils.projectSettings.get('components');
         var userJs = String(file.contents);
-        var userJsTemplate = jetpack.read(cascade.path + settings.js.templateFilePath);
+        var userJsTemplate = jetpack.read(cascade.path + cascade.js.templateFilePath);
         var license = jetpack.read(cascade.path + '/LICENSE');
         var component = file.relative.split('.')[0];
         // var js = [];
         // var jsPlugins = [];
         // var jsSnippets = [];
         var jsWhiteList = [];
-        var comp = _.find(project.components, function (thiscomp) {
+        var comp = _.find(project, function (thiscomp) {
             return thiscomp.name === component;
         });
         // js = js.join('\n\n');
@@ -47,10 +47,6 @@ module.exports = function () {
         });
         var data = {
             userjs: userJs,
-            // dependencies: js,
-            // plugins: jsPlugins,
-            // cdnscripts: jsWhiteList,
-            // pluginfragments: jsSnippets,
             license: license
         };
         var mapper = {};
@@ -63,9 +59,6 @@ module.exports = function () {
                 };
             });
         });
-        // if (jsSnippets) {
-        //     console.error(jsSnippets);
-        // }
         var jsTemplate = Handlebars.compile(userJsTemplate);
         js = jsTemplate(data);
         file.contents = new Buffer(js);
