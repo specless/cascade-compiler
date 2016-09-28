@@ -124,11 +124,6 @@ module.exports = {
                             spritePath: folder + '/' + cascade.assetsDirName
                         }));
                     }).pipe(rename(function (path) {
-                        _.each(dump, function (values, which) {
-                            utils.component(which, function (component) {
-                                _.extend(component, values);
-                            });
-                        });
                         path.basename = path.dirname;
                         path.dirname = '';
                     })).pipe(gulp.dest(folder + '/' + cascade.buildDir)) //
@@ -137,7 +132,7 @@ module.exports = {
                             utils.sendMessage("CSS Compiled successfully.", null, 4);
                         }
                         utils.sendMessage("Command Completed: Compile CSS", null, 1);
-                        _.each(dump, function (values, which) {
+                        _.each(dump.components, function (values, which) {
                             utils.component(which, function (component) {
                                 _.extend(component, values);
                             });

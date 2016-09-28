@@ -98,5 +98,50 @@
     "message": "Server: Listening On Port: 8787",
     "code": 2,
     "details": null
+  },
+  {
+    "message": "Command Received: Compile HTML",
+    "code": 1,
+    "details": null
+  },
+  {
+    "message": "HTML Compiled successfully.",
+    "code": 4,
+    "details": null
+  },
+  {
+    "message": "Command Completed: Compile HTML",
+    "code": 1,
+    "details": null
+  },
+  {
+    "message": "Command Received: Compile CSS",
+    "code": 1,
+    "details": null
+  },
+  {
+    "message": "Command Received: Compile Javascript",
+    "code": 1,
+    "details": null
+  },
+  {
+    "message": "Javascript Compiled successfully.",
+    "code": 4,
+    "details": null
+  },
+  {
+    "message": "Command Completed: Compile Javascript",
+    "code": 1,
+    "details": null
+  },
+  {
+    "message": "CSS Compiled successfully.",
+    "code": 4,
+    "details": null
+  },
+  {
+    "message": "Command Completed: Compile CSS",
+    "code": 1,
+    "details": null
   }
 ]

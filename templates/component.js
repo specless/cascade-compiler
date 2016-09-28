@@ -1,5 +1,5 @@
 {{{license}}}
-panel.userJS(function (specless, _, factories, documentView, scopedFactories, $) {
+content.userJS(function (content, specless, _, factories, documentView, scopedFactories, $) {
     "use strict";
     {{{pluginfragments}}}
     //================ Begin User Created JS =================

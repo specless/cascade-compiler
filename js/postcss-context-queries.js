@@ -135,7 +135,13 @@ module.exports = postcss.plugin('context-queries', function (opts) {
             node.type = "rule";
             addToContextList(contexts, createSelector(node, file.component));
         });
-        utils.makeComponent(opts.dump, file.component).contexts = contexts;
+        // _.each(opts.dump.components, function (value, which) {
+        //     console.log(value, which);
+        utils.component(file.component, function (component) {
+            component.contexts = contexts;
+        });
+        // });
+        // utils.makeComponent(opts.dump, file.component).contexts = contexts;
         contexts = {};
     };
 });
