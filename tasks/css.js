@@ -97,7 +97,7 @@ module.exports = {
     glob: globber,
     registerTask: function () {
         gulp.task('css', function () {
-            var Q = require('Q');
+            var Q = require('q');
             utils.sendMessage("Command Received: Compile CSS", null, 1);
             var cascade = utils.compilerSettings.copy();
             var component = process.argv[3];
