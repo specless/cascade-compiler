@@ -7,6 +7,7 @@ var rename = require('gulp-rename');
 var utils = require('../js/utils.js');
 // var strip = require("strip-css-singleline-comments");
 var tap = require("gulp-tap");
+var path = require('path');
 var toBuffer = require("gulp-buffer");
 var globber = function (glob, syntax, dump, custom_fn, err_handler, finished_hander) {
     var postcssBefore = [
@@ -146,14 +147,20 @@ module.exports = {
                     });
             });
             var assets_deferred = Q.Promise(function (success, failure) {
-                gulp.src(folder + cascade.css.templateFilePath).pipe(postcss(after_)).pipe(gulp.dest(folder + '/' + cascade.assetsDirName)).on('end', function (err) {
-                    if (err) {
-                        console.log('could not build base css', err.stack);
-                        failure();
-                        return err;
-                    }
-                    success();
-                });
+                // console.log(cascade.css.templateFilePath);
+                gulp.src(path.join(process.cwd(), cascade.css.templateFilePath)) //
+                    .pipe(postcss(after_)) //
+                    .pipe(gulp.dest(folder + '/' + cascade.assetsDirName)) //
+                    .on('end', function (err) {
+                        if (err) {
+                            console.log('could not build base css', err.stack);
+                            failure();
+                            return err;
+                        }
+                        success();
+                        // }).on('error', function (e) {
+                        //     console.log(e);
+                    });
             });
             return Q.all([assets_deferred, css_deferred]);
         });

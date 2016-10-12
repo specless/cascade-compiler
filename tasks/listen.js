@@ -153,6 +153,7 @@ gulp.task('listen', ['build'], function () {
     };
     var assetsRoute = express.static(settings.path + '/' + cascade.assetsDirName);
     var componentsStatic = express.static(settings.path + '/' + cascade.buildDir);
+    app.use('/content/:content_id/:version?/:alternater?/panels/assets', assetsRoute);
     app.use('/content/:content_id/:version?/:alternater?/panels', function (req, res, next) {
         var parsed_url = url.parse(req.url);
         if ((pathnamesplit = parsed_url.pathname.split('.'))[pathnamesplit.length - 1] === 'html') {
@@ -163,9 +164,7 @@ gulp.task('listen', ['build'], function () {
             return componentsStatic.apply(this, arguments);
         }
     });
-    app.use('/content/:content_id/:version?/:alternater?/assets/', function (req, res, next) {
-        return assetsRoute.apply(this, arguments);
-    });
+    app.use('/content/:content_id/:version?/:alternater?/assets', assetsRoute);
     app.use('/settings', express.static(settings.path + '/' + cascade.settingsFileName));
     app.get('/json/panels', function (req, res, next) {
         var adJSON, params = req.query;
