@@ -17,7 +17,7 @@ var stream = require('stream');
 var through = require('through2');
 var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
-var argv = require('yargs');
+var argv = require('yargs').argv;
 gulp.task('reload', ['recompile'], function () {
     io.emit('reload', utils.projectSettings.copy());
 });
