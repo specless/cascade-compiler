@@ -17,6 +17,7 @@ var stream = require('stream');
 var through = require('through2');
 var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
+var argv = require('yargs');
 gulp.task('reload', ['recompile'], function () {
     io.emit('reload', utils.projectSettings.copy());
 });
@@ -89,7 +90,7 @@ gulp.task('listen', ['build'], function () {
         };
         var previewUrl;
         _.each(projectSettings.components, function (component) {
-            var prefix = 'http://localhost:' + cascade.serverPort + '/components/' + component.name;
+            var prefix = 'http://localhost:' + (argv.port || 8787) + '/components/' + component.name;
             var obj = {
                 src: prefix + '.html',
                 jsLocation: prefix + '.js'
@@ -279,7 +280,7 @@ gulp.task('listen', ['build'], function () {
             cb(null, file);
         }));
     });
-    app.listen(cascade.serverPort, '0.0.0.0', function (err) {
-        utils.sendMessage("Server: Listening On Port: " + cascade.serverPort, null, 2);
+    app.listen((argv.port || 8787), '0.0.0.0', function (err) {
+        utils.sendMessage("Server: Listening On Port: " + (argv.port || 8787), null, 2);
     });
 });

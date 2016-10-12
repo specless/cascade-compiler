@@ -74,7 +74,6 @@
     "specless-cascade": {
         "csfVersion": 623,
         "path": "/Users/michaelmclaughlin/Sites/specless/cascade-app-source/compiler",
-        "serverPort": "8787",
         "autoReload": {
             "all": true,
             "html": true,
