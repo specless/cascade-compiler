@@ -184,6 +184,9 @@ gulp.task('listen', ['build'], function () {
                     });
                 } else {
                     _.each(partsHash, function (obj, key) {
+                        if (!obj) {
+                            return;
+                        }
                         var component = _.findWhere(adJSON.components, {
                             name: obj.name
                         });
@@ -218,6 +221,8 @@ gulp.task('listen', ['build'], function () {
             var name = part.split('_')[2];
             getUserHTML(name, makeFullUrl(req), function (err, html) {
                 if (err) {
+                    partsHash[part] = null;
+                    trytosend();
                     return err;
                 }
                 partsHash[part] = {
