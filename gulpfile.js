@@ -33,7 +33,7 @@ gulp.task('open', ['clean'], function (cb) {
 gulp.task('build', function (cb) {
     utils.sendMessage("Command Received: Build Project", null, 1);
     return Q.Promise(function (success, failure) {
-        runSequence('open', ['html', 'js', 'css'], function (err) {
+        runSequence('open', 'recompile', function (err) {
             if (err) {
                 utils.sendMessage("There was an error building your project.", err.message, 3);
                 utils.sendMessage("Command Completed: Build Project", null, 1);
@@ -47,6 +47,6 @@ gulp.task('build', function (cb) {
         });
     });
 });
-gulp.task('start', ['listen'], function () {
+gulp.task('start', ['build', 'listen'], function () {
     utils.sendMessage("Command Received: Start Cascade Compiler", null, 1);
 });

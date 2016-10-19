@@ -23,6 +23,7 @@
   },
   "homepage": "https://cascade.readme.io/docs",
   "dependencies": {
+    "aunt-suzy": "^1.0.0",
     "autoprefixer": "^6.3.6",
     "body-parser": "^1.15.2",
     "chokidar": "^1.6.0",

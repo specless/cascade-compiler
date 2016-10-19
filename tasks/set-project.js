@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var utils = require('../js/utils.js');
 var _ = require('underscore');
 var Q = require('q');
+var suzy = require('aunt-suzy');
 gulp.task('set-project', function () {
     var deferred = Q.defer();
     utils.sendMessage("Command Received: Set Project Directory", null, 1);
@@ -16,7 +17,7 @@ gulp.task('set-project', function () {
     //    }
     // });
     // console.log(argv.path);
-    path = argv.path;
+    path = suzy.normalize(argv.path);
     if (utils.validateProject(path) === true) {
         utils.compilerSettings.set({
             currentProjectDir: path

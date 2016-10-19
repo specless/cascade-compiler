@@ -18,25 +18,25 @@ var through = require('through2');
 var gutil = require('gulp-util');
 var PluginError = gutil.PluginError;
 var argv = require('yargs').argv;
-gulp.task('reload', ['recompile'], function () {
-    io.emit('reload', utils.projectSettings.copy());
+gulp.task('recompile', ['html', 'css', 'js'], function () {
+    utils.projectSettings.write();
 });
-gulp.task('recompile', function () {
-    runSequence('html', ['css', 'js']);
-});
-var currentData;
-gulp.task('reload-css', function () {
-    currentData = utils.projectSettings.copy();
-    runSequence('css', 'emit-reload');
-});
-gulp.task('emit-reload', ['recompile'], function () {
-    var updatedData = utils.projectSettings.copy();
-    var message = 'reload';
-    if (_.isEqual(currentData.components, updatedData.components)) {
-        message = 'reload-css';
-    }
-    io.emit('reload', utils.projectSettings.copy());
-});
+// gulp.task('reload', ['recompile'], function () {
+//     io.emit('reload', utils.projectSettings.copy());
+// });
+// var currentData;
+// gulp.task('reload-css', function () {
+//     currentData = utils.projectSettings.copy();
+//     runSequence('css', 'emit-reload');
+// });
+// gulp.task('emit-reload', ['recompile'], function () {
+//     var updatedData = utils.projectSettings.copy();
+//     var message = 'reload';
+//     if (_.isEqual(currentData.components, updatedData.components)) {
+//         message = 'reload-css';
+//     }
+//     io.emit('reload', utils.projectSettings.copy());
+// });
 var gutil = require('gulp-util');
 var string_src = function (filename, string) {
     var src = require('stream').Readable({
@@ -53,7 +53,7 @@ var string_src = function (filename, string) {
     };
     return src;
 };
-gulp.task('listen', ['build'], function () {
+gulp.task('listen', function () {
     utils.sendMessage("Command Received: Start Server and Listen for Changes", null, 1);
     var cascade = utils.compilerSettings.copy();
     var settings = utils.projectSettings.copy();
@@ -63,16 +63,17 @@ gulp.task('listen', ['build'], function () {
     var jsFiles = [settings.path + '/**/' + cascade_settings.js.fileName, '!' + settings.path + '/{' + cascade.assetsDirName + ',' + cascade.assetsDirName + '/**}'];
     var allFiles = [settings.path + '/**/*', '!' + settings.path + '/{' + cascade.buildDir + ',' + cascade.buildDir + '/**}'];
     var assetFiles = [settings.path + '/assets/**/*'];
-    gulp.watch(htmlFiles, ['reload']);
-    gulp.watch(cssFiles, ['reload-css']);
-    gulp.watch(jsFiles, ['reload']);
-    chokidar.watch(assetFiles).on('all', function (event, path) {
-        io.emit('reload-asset', {
-            event: event,
-            path: path,
-            project: utils.projectSettings.copy()
-        });
-    });
+    // gulp.watch(htmlFiles, ['reload']);
+    // gulp.watch(cssFiles, ['recompile']);
+    // gulp.watch(jsFiles, ['reload']);
+    gulp.watch(allFiles, ['recompile']);
+    // chokidar.watch(assetFiles).on('all', function (event, path) {
+    //     io.emit('reload-asset', {
+    //         event: event,
+    //         path: path,
+    //         project: utils.projectSettings.copy()
+    //     });
+    // });
     app.use(function (req, res, next) {
         res.header('Access-Control-Allow-Origin', '*');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -130,7 +131,7 @@ gulp.task('listen', ['build'], function () {
     app.use(bodyParser.json());
     var renderComponent = function (component, url_, fn) {
         // console.log(url_);
-        return ejs.renderFile(path.join(cascade.currentProjectDir, '.output/', component + '.html'), {
+        return ejs.renderFile(path.join(currentProjectDir, '.output/', component + '.html'), {
             url: 'http://localhost:8787/',
             component: component
                 // paths: paths('http://localhost:8787/')
@@ -149,11 +150,13 @@ gulp.task('listen', ['build'], function () {
             return fn && fn.apply(this, arguments);
         });
     };
+    var currentProjectDir = cascade.currentProjectDir;
     var getAdJSON = function (fn) {
-        fs.readFile(settings.path + '/' + cascade.settingsFileName, fn);
+        fs.readFile(currentProjectDir + '/' + cascade.settingsFileName, fn);
     };
-    var assetsRoute = express.static(settings.path + '/' + cascade.assetsDirName);
-    var componentsStatic = express.static(settings.path + '/' + cascade.buildDir);
+    console.log(currentProjectDir + '/' + cascade.assetsDirName);
+    var assetsRoute = express.static(currentProjectDir + '/' + cascade.assetsDirName);
+    var componentsStatic = express.static(currentProjectDir + '/' + cascade.buildDir);
     app.use('/content/:content_id/:version?/:alternater?/panels/assets', assetsRoute);
     app.use('/content/:content_id/:version?/:alternater?/panels', function (req, res, next) {
         var parsed_url = url.parse(req.url);
@@ -284,6 +287,11 @@ gulp.task('listen', ['build'], function () {
             }));
             cb(null, file);
         }));
+    });
+    app.use(function (req, res, next) {
+        console.log(req.url);
+        res.status(404);
+        res.send(new Error('not found'));
     });
     app.listen((argv.port || 8787), '0.0.0.0', function (err) {
         utils.sendMessage("Server: Listening On Port: " + (argv.port || 8787), null, 2);

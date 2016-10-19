@@ -35,7 +35,7 @@ module.exports = {
             }
         },
         settings: function () {
-            return this.folder() + '/' + compilerSettings.settingsFileName;
+            return path.join(this.folder(), compilerSettings.settingsFileName);
         },
         get: function (key) {
             return projectSettings[key];
@@ -140,8 +140,8 @@ module.exports = {
             cascade = this.compilerSettings.copy();
             folder = this.projectSettings.folder();
             this.projectSettings.set({
-                currentProjectDir: path,
-                path: folder,
+                // currentProjectDir: path,
+                // path: folder,
                 name: folder.split('/').pop()
             });
             // settings.path = this.projectSettings.folder();

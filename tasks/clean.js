@@ -3,6 +3,7 @@ var utils = require('../js/utils.js');
 var clean = require('gulp-clean');
 var plumber = require('gulp-plumber');
 var jetpack = require('fs-jetpack');
+var path = require('path');
 gulp.task('clean', function () {
     var messageLog = './message-log.json';
     jetpack.write(messageLog, '[]');

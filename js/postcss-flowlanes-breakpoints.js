@@ -34,8 +34,8 @@ module.exports = postcss.plugin('flowlanes-breakpoints', function (opts) {
                 name: layoutname
             };
             if (_.find(layouts, function (layout) {
-                return layout.name === layoutname;
-            })) {
+                    return layout.name === layoutname;
+                })) {
                 utils.exception('define-layout declarations cannot have the same name');
                 // error... can't declarations with multiple names
             }
@@ -61,8 +61,8 @@ module.exports = postcss.plugin('flowlanes-breakpoints', function (opts) {
             });
             layout.name = layoutname;
             if (_.find(layouts, function (lt) {
-                return _.isEqual(lt.height, layout.height) && _.isEqual(lt.width, layout.width);
-            })) {
+                    return _.isEqual(lt.height, layout.height) && _.isEqual(lt.width, layout.width);
+                })) {
                 utils.exception('layouts cannot have the same dimensions / dimension ranges');
                 // layouts cannot have the same dimension stipulations
             }
@@ -84,7 +84,11 @@ module.exports = postcss.plugin('flowlanes-breakpoints', function (opts) {
                 understandLayout(node, layouts);
             }
         });
-        utils.makeComponent(opts.dump, file.component).layouts = layouts;
+        // console.log(layouts);
+        // utils.makeComponent(opts.dump, file.component).layouts = layouts;
+        utils.component(file.component, function (component) {
+            component.layouts = layouts;
+        });
         layouts = [];
     };
 });
