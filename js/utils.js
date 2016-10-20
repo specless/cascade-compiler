@@ -263,7 +263,7 @@ module.exports = {
         });
     },
     sendMessage: function (message, details, code) {
-        var messageLog = jetpack.read('./message-log.json', 'json');
+        var messageLog = jetpack.read('./message-log.json', 'json') || [];
         var obj = {
             message: message,
             code: code,
