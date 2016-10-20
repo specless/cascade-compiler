@@ -99,7 +99,7 @@ module.exports = {
     registerTask: function () {
         gulp.task('css', function () {
             var Q = require('q');
-            utils.sendMessage("Command Received: Compile CSS", null, 1);
+            // utils.sendMessage("Command Received: Compile CSS", null, 1);
             var cascade = utils.compilerSettings.copy();
             var component = process.argv[3];
             var glob;
@@ -107,9 +107,9 @@ module.exports = {
             var folder = utils.projectSettings.folder();
             if (component) {
                 component = component.replace('--', '');
-                glob = [folder + '/' + component + '/' + cascade.css.fileName];
+                glob = [path.join(folder, component, cascade.css.fileName)];
             } else {
-                glob = [folder + '/**/' + cascade.css.fileName, '!' + folder + '/{' + cascade.assetsDirName + ',' + cascade.assetsDirName + '/**}'];
+                glob = [path.join(folder, '/**/', cascade.css.fileName), path.join('!', folder, '/{', cascade.assetsDirName, ',', cascade.assetsDirName, '/**}')];
             }
             var after_, dump = {};
             var css_deferred = Q.Promise(function (success, failure) {
@@ -122,17 +122,17 @@ module.exports = {
                         }));
                         after.unshift(require('postcss-easysprites')({
                             imagePath: folder,
-                            spritePath: folder + '/' + cascade.assetsDirName
+                            spritePath: path.join(folder, cascade.assetsDirName)
                         }));
                     }).pipe(rename(function (path) {
                         path.basename = path.dirname;
                         path.dirname = '';
-                    })).pipe(gulp.dest(folder + '/' + cascade.buildDir)) //
+                    })).pipe(gulp.dest(path.join(folder, cascade.buildDir))) //
                     .on('end', function (err) {
                         if (this.successfullyCompiled !== false) {
                             utils.sendMessage("CSS Compiled successfully.", null, 4);
                         }
-                        utils.sendMessage("Command Completed: Compile CSS", null, 1);
+                        // utils.sendMessage("Command Completed: Compile CSS", null, 1);
                         _.each(dump.components, function (values, which) {
                             utils.component(which, function (component) {
                                 _.extend(component, values);
@@ -150,7 +150,7 @@ module.exports = {
                 // console.log(cascade.css.templateFilePath);
                 gulp.src(path.join(process.cwd(), cascade.css.templateFilePath)) //
                     .pipe(postcss(after_)) //
-                    .pipe(gulp.dest(folder + '/' + cascade.assetsDirName)) //
+                    .pipe(gulp.dest(path.join(folder, cascade.assetsDirName))) //
                     .on('end', function (err) {
                         if (err) {
                             console.log('could not build base css', err.stack);
@@ -158,8 +158,6 @@ module.exports = {
                             return err;
                         }
                         success();
-                        // }).on('error', function (e) {
-                        //     console.log(e);
                     });
             });
             return Q.all([assets_deferred, css_deferred]);

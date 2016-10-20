@@ -8,7 +8,7 @@ var prettify = require('gulp-html-prettify');
 // var processHtml = require('../js/process-html.js');
 var Handlebars = require("handlebars");
 gulp.task('html', function () {
-    utils.sendMessage("Command Received: Compile HTML", null, 1);
+    // utils.sendMessage("Command Received: Compile HTML", null, 1);
     var cascade = utils.compilerSettings.copy();
     var settings = utils.compilerSettings.copy();
     var folder = utils.projectSettings.folder();
@@ -37,7 +37,7 @@ gulp.task('html', function () {
             if (success === true) {
                 utils.sendMessage("HTML Compiled successfully.", null, 4);
             }
-            utils.sendMessage("Command Completed: Compile HTML", null, 1);
+            // utils.sendMessage("Command Completed: Compile HTML", null, 1);
             success = true;
         });
 });

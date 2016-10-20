@@ -34,6 +34,9 @@ module.exports = {
                 return compilerSettings.currentProjectDir;
             }
         },
+        buildDir: function () {
+            return '.output/';
+        },
         settings: function () {
             return path.join(this.folder(), compilerSettings.settingsFileName);
         },
@@ -55,6 +58,9 @@ module.exports = {
         },
         write: function () {
             jetpack.write(this.settings(), projectSettings);
+        },
+        allFiles: function () {
+            return [path.join(this.folder(), '/**/*'), path.join('!', this.folder(), '/{', this.buildDir(), ',', this.buildDir(), '/**}')];
         }
     },
     compilerSettings: {

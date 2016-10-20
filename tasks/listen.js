@@ -16,27 +16,12 @@ var ejs = require('ejs');
 var stream = require('stream');
 var through = require('through2');
 var gutil = require('gulp-util');
+var q = require('q');
 var PluginError = gutil.PluginError;
 var argv = require('yargs').argv;
 gulp.task('recompile', ['html', 'css', 'js'], function () {
     utils.projectSettings.write();
 });
-// gulp.task('reload', ['recompile'], function () {
-//     io.emit('reload', utils.projectSettings.copy());
-// });
-// var currentData;
-// gulp.task('reload-css', function () {
-//     currentData = utils.projectSettings.copy();
-//     runSequence('css', 'emit-reload');
-// });
-// gulp.task('emit-reload', ['recompile'], function () {
-//     var updatedData = utils.projectSettings.copy();
-//     var message = 'reload';
-//     if (_.isEqual(currentData.components, updatedData.components)) {
-//         message = 'reload-css';
-//     }
-//     io.emit('reload', utils.projectSettings.copy());
-// });
 var gutil = require('gulp-util');
 var string_src = function (filename, string) {
     var src = require('stream').Readable({
@@ -54,26 +39,15 @@ var string_src = function (filename, string) {
     return src;
 };
 gulp.task('listen', function () {
-    utils.sendMessage("Command Received: Start Server and Listen for Changes", null, 1);
+    // utils.sendMessage("Command Received: Start Server and Listen for Changes", null, 1);
     var cascade = utils.compilerSettings.copy();
     var settings = utils.projectSettings.copy();
+    var currentProjectDir = cascade.currentProjectDir;
     var cascade_settings = require('../settings');
-    var htmlFiles = [settings.path + '/**/' + cascade.html.fileName, '!' + settings.path + '/{' + cascade.assetsDirName + ',' + cascade.assetsDirName + '/**}'];
-    var cssFiles = [settings.path + '/**/' + cascade.css.fileName, '!' + settings.path + '/{' + cascade.assetsDirName + ',' + cascade.assetsDirName + '/**}'];
-    var jsFiles = [settings.path + '/**/' + cascade_settings.js.fileName, '!' + settings.path + '/{' + cascade.assetsDirName + ',' + cascade.assetsDirName + '/**}'];
-    var allFiles = [settings.path + '/**/*', '!' + settings.path + '/{' + cascade.buildDir + ',' + cascade.buildDir + '/**}'];
-    var assetFiles = [settings.path + '/assets/**/*'];
-    // gulp.watch(htmlFiles, ['reload']);
-    // gulp.watch(cssFiles, ['recompile']);
-    // gulp.watch(jsFiles, ['reload']);
-    gulp.watch(allFiles, ['recompile']);
-    // chokidar.watch(assetFiles).on('all', function (event, path) {
-    //     io.emit('reload-asset', {
-    //         event: event,
-    //         path: path,
-    //         project: utils.projectSettings.copy()
-    //     });
-    // });
+    var htmlFiles = [path.join(currentProjectDir, '/**/', cascade.html.fileName), path.join('!', currentProjectDir, '/{', cascade.assetsDirName, ',', cascade.assetsDirName, '/**}')];
+    var cssFiles = [path.join(currentProjectDir, '/**/', cascade.css.fileName), path.join('!', currentProjectDir, '/{', cascade.assetsDirName, ',', cascade.assetsDirName, '/**}')];
+    var jsFiles = [path.join(currentProjectDir, '/**/', cascade_settings.js.fileName), path.join('!', currentProjectDir, '/{', cascade.assetsDirName, ',', cascade.assetsDirName, '/**}')];
+    var assetFiles = [path.join(currentProjectDir, '/assets/**/*')];
     app.use(function (req, res, next) {
         res.header('Access-Control-Allow-Origin', '*');
         res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -150,13 +124,11 @@ gulp.task('listen', function () {
             return fn && fn.apply(this, arguments);
         });
     };
-    var currentProjectDir = cascade.currentProjectDir;
     var getAdJSON = function (fn) {
-        fs.readFile(currentProjectDir + '/' + cascade.settingsFileName, fn);
+        fs.readFile(path.join(currentProjectDir, cascade.settingsFileName), fn);
     };
-    console.log(currentProjectDir + '/' + cascade.assetsDirName);
-    var assetsRoute = express.static(currentProjectDir + '/' + cascade.assetsDirName);
-    var componentsStatic = express.static(currentProjectDir + '/' + cascade.buildDir);
+    var assetsRoute = express.static(path.join(currentProjectDir, cascade.assetsDirName));
+    var componentsStatic = express.static(path.join(currentProjectDir, cascade.buildDir));
     app.use('/content/:content_id/:version?/:alternater?/panels/assets', assetsRoute);
     app.use('/content/:content_id/:version?/:alternater?/panels', function (req, res, next) {
         var parsed_url = url.parse(req.url);
@@ -169,7 +141,7 @@ gulp.task('listen', function () {
         }
     });
     app.use('/content/:content_id/:version?/:alternater?/assets', assetsRoute);
-    app.use('/settings', express.static(settings.path + '/' + cascade.settingsFileName));
+    app.use('/settings', express.static(path.join(currentProjectDir, cascade.settingsFileName)));
     app.get('/json/panels', function (req, res, next) {
         var adJSON, params = req.query;
         var parts = params.parts.split(',');
@@ -293,7 +265,10 @@ gulp.task('listen', function () {
         res.status(404);
         res.send(new Error('not found'));
     });
-    app.listen((argv.port || 8787), '0.0.0.0', function (err) {
-        utils.sendMessage("Server: Listening On Port: " + (argv.port || 8787), null, 2);
+    return q.Promise(function (success, failure) {
+        app.listen((argv.port || 8787), '0.0.0.0', function (err) {
+            utils.sendMessage("Server: Listening On Port: " + (argv.port || 8787), null, 2);
+            success();
+        });
     });
 });
