@@ -183,7 +183,7 @@ gulp.task('listen', function () {
                             name: obj.name
                         });
                         _.extend(obj, {
-                            base: req.protocol + '://' + req.hostname + ':8787/content/000000/vsn/randompath' + '/000' + '/'
+                            base: req.protocol + '://' + req.hostname + ':8787/content/000000/vsn/randompath' + '000' + '/'
                                 // parseInt(Math.random() * 1000)
                         }, component);
                         obj.imports = [{
