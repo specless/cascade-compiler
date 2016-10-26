@@ -129,8 +129,25 @@ gulp.task('listen', function () {
     };
     var assetsRoute = express.static(path.join(currentProjectDir, cascade.assetsDirName));
     var componentsStatic = express.static(path.join(currentProjectDir, cascade.buildDir));
-    app.use('/content/:content_id/:version?/:alternater?/panels/assets', assetsRoute);
-    app.use('/content/:content_id/:version?/:alternater?/panels', function (req, res, next) {
+    var pluginsRoute = express.static(path.join(process.cwd(), 'plugins'));
+    var pattern = '/content/:content_id/:version?/:alternater?/panels';
+    var pluginsRouteIndex = function (req, res, next) {
+        if (req.params && plugs[req.params.name]) {
+            console.log(req.params);
+            next();
+        } else {
+            next();
+        }
+    };
+    _.each({
+        '/plugins/:name': pluginsRouteIndex,
+        '/plugins': pluginsRoute
+    }, function (handler, key) {
+        app.use(pattern + key, handler);
+        app.use(key, handler);
+    });
+    app.use(pattern + '/assets', assetsRoute);
+    app.use(pattern, function (req, res, next) {
         var parsed_url = url.parse(req.url);
         if ((pathnamesplit = parsed_url.pathname.split('.'))[pathnamesplit.length - 1] === 'html') {
             renderComponent(component, req.url, function (err, html) {

@@ -212,7 +212,7 @@
 		height: auto;
 		border-radius: 50%;
 		transform: translate(-50%, -50%);
-		background-image: url('data:image/svg+xml;utf8,<svg version="1.1" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 200 200" xml:space="preserve"><polygon fill="%23FFFFFF" points="22,200 22,0 179.8,100 "/></svg>');
+		background-image: url("data:image/svg+xml;utf8,<svg version="1.1" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 200 200" xml:space="preserve"><polygon fill="%23FFFFFF" points="22,200 22,0 179.8,100 "/></svg>");
 		background-position: 72% center;
 		background-size: 70%;
 		background-repeat: no-repeat;

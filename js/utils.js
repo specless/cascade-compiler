@@ -296,7 +296,8 @@ module.exports = {
         var pluginsDir = settings.pluginsFolder + '/';
         var matches = [];
         _.each(plugins, function (plugin) {
-            var pluginSettings = jetpack.read('.' + pluginsDir + plugin + '/package.json', 'json')['specless-cascade-plugin'];
+            var plugPath = path.join('.', pluginsDir, plugin, '/package.json');
+            var pluginSettings = jetpack.read(plugPath, 'json')['specless-cascade-plugin'];
             _.each(pluginSettings.triggers, function (pluginItem) {
                 if (pluginItem.type === type) {
                     var trigger = pluginItem;

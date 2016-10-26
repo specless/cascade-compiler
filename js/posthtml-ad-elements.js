@@ -46,11 +46,11 @@ module.exports = function (opts) {
                         }
                         if (!attr.dependencies) {
                             attr.dependencies = {
-                                "css": [],
-                                "jsPlugins": [],
-                                "js": [],
-                                "dataSources": [],
-                                "jsSnippets": []
+                                css: [],
+                                jsPlugins: [],
+                                js: [],
+                                dataSources: [],
+                                jsSnippets: []
                             };
                         }
                         attr.dependencies.jsSnippets = transformedEl.jsSnippets;
@@ -108,11 +108,11 @@ module.exports = function (opts) {
                 }
                 if (!element.dependencies) {
                     element.dependencies = {
-                        "css": [],
-                        "jsPlugins": [],
-                        "js": [],
-                        "dataSources": [],
-                        "jsSnippets": []
+                        css: [],
+                        jsPlugins: [],
+                        js: [],
+                        dataSources: [],
+                        jsSnippets: []
                     };
                 }
                 element.dependencies.jsSnippets = transformedEl.jsSnippets;
@@ -127,11 +127,6 @@ module.exports = function (opts) {
                 }
                 dependencies = utils.addDeps(dependencies, element.dependencies, element.path);
                 node = transformedEl.node;
-                // if (node === null) {
-                //     delete node;
-                // } else {
-                //     return node;
-                // }
             });
         });
         // Finally process all elements used that require normalization-- and insert those as css dependencies before the custom ones.
@@ -145,6 +140,7 @@ module.exports = function (opts) {
             });
         });
         dependencies.css = normalizeDeps.concat(dependencies.css);
+        // console.log(dependencies);
         // utils.logComponentDetails(component, 'html', 'dependencies', dependencies);
     };
 };
