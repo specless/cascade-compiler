@@ -1,0 +1,44 @@
+_ad-close-button{
+	display:inline-block;
+	position:absolute;
+	width:50px;
+	height:50px;
+	top:0;
+	right:0;
+	opacity:0.5;
+	-webkit-transition:0.25s ease opacity;
+	transition:0.25s ease opacity;
+}
+
+_ad-close-button:hover,
+_ad-close-button:focus{
+	opacity:0.8;
+}
+
+_ad-close-button::before{
+	content:"";
+	display:inline-block;
+	width:26px;
+	height:26px;
+	border-radius:50%;
+	border:2px solid #000000;
+	background-color:#ffffff;
+	position:absolute;
+	top:50%;
+	left:50%;
+	-webkit-transform:translate(-50%, -50%);
+	        transform:translate(-50%, -50%);
+}
+
+_ad-close-button::after{
+	font-family:"Times New Roman", "Times", serif;
+	font-size:36px;
+	content:"\00d7";
+	display:inline-block;
+	color:#000000;
+	position:absolute;
+	top:50%;
+	left:50%;
+	-webkit-transform:translate(-50%, -50%);
+	        transform:translate(-50%, -50%);
+}

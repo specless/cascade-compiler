@@ -6,6 +6,7 @@ var app = express();
 var httpService = require('http');
 var http = httpService.Server(app);
 var io = require('socket.io')(http);
+var deepReaddir = require('deep-readdir');
 var chokidar = require('chokidar');
 var runSequence = require('run-sequence');
 var bodyParser = require('body-parser');
@@ -17,10 +18,84 @@ var stream = require('stream');
 var through = require('through2');
 var gutil = require('gulp-util');
 var q = require('q');
+var jetpack = require('fs-jetpack');
 var PluginError = gutil.PluginError;
 var argv = require('yargs').argv;
-gulp.task('recompile', ['html', 'css', 'js'], function () {
-    utils.projectSettings.write();
+gulp.task('recompile', function (cb) {
+    runSequence('plugins', ['html', 'css', 'js'], function () {
+        utils.projectSettings.write();
+        cb();
+    });
+});
+gulp.task('watch-plugins', function () {
+    gulp.watch(['./plugins/**/src/**/*', '!./plugins/**/dist/**/*'], ['plugins']);
+});
+var fse = require('fs-extra');
+var argv = require('yargs').argv;
+gulp.task('plugins', function () {
+    var cascade = utils.compilerSettings.copy();
+    var plugin = cascade.plugin;
+    var dir = path.join(process.cwd(), plugin.root);
+    var copySrcDist = function (folder, s, f) {
+        var dist = path.join(folder, './dist');
+        var src = path.join(folder, './src');
+        var straightCopy = {
+            js: true,
+            html: true
+        };
+        deepReaddir.deepReaddir(src, function (list) {
+            q.all(_.map(list, function (item) {
+                var relative = path.relative(src, item);
+                var extension = path.extname(relative);
+                var relativeDist = path.join(src, '../dist', relative);
+                if (!extension) {
+                    return;
+                }
+                extension = extension.slice(1);
+                if (straightCopy[extension]) {
+                    fs.readFile(item, function (err, file) {
+                        jetpack.write(relativeDist, file);
+                    });
+                } else if (extension === 'css') {
+                    require('./css.js').glob(path.join(src, relative), utils.compilerSettings.copy().css.syntax, {}, null, function (err) {
+                        console.error(err);
+                    }).pipe(through.obj(function (file, enc, cb) {
+                        // var contents = file.toString();
+                        // console.dir(file._contents.toString());
+                        jetpack.write(relativeDist, file._contents.toString());
+                    }));
+                }
+            })).then(s).catch(f);
+        }, {
+            hidden: false
+        });
+    };
+    var readsPlugins = function (companypath, list) {
+        return q.all(_.map(list, function (folder) {
+            if (!folder || folder[0] === '.') {
+                return;
+            }
+            return q.Promise(function (s, f) {
+                var pluginfolder = path.join(companypath, folder);
+                var gulpfilepath = path.join(pluginfolder, 'gulpfile.js');
+                fs.readFile(gulpfilepath, function (err, file) {
+                    if (err || !file) {
+                        copySrcDist(pluginfolder, s, f);
+                    } else {
+                        // run gulpfile
+                    }
+                });
+            });
+        }));
+    };
+    return q.all(_.map(plugin.companies, function (company) {
+        return q.Promise(function (success, failure) {
+            var companypath = path.join(dir, company);
+            fs.readdir(companypath, function (err, list) {
+                readsPlugins(companypath, list).then(success, failure);
+            });
+        });
+    }));
 });
 var gutil = require('gulp-util');
 var string_src = function (filename, string) {
@@ -104,7 +179,6 @@ gulp.task('listen', function () {
     }));
     app.use(bodyParser.json());
     var renderComponent = function (component, url_, fn) {
-        // console.log(url_);
         return ejs.renderFile(path.join(currentProjectDir, '.output/', component + '.html'), {
             url: 'http://localhost:8787/',
             component: component
@@ -129,25 +203,71 @@ gulp.task('listen', function () {
     };
     var assetsRoute = express.static(path.join(currentProjectDir, cascade.assetsDirName));
     var componentsStatic = express.static(path.join(currentProjectDir, cascade.buildDir));
-    var pluginsRoute = express.static(path.join(process.cwd(), 'plugins'));
-    var pattern = '/content/:content_id/:version?/:alternater?/panels';
+    var pluginSettings = cascade.plugin;
+    var pluginsFolder = path.join(process.cwd(), pluginSettings.root);
+    var pluginsRoute = express.static(pluginsFolder);
+    var pattern = '/content/:content_id/:version?/:alternater?';
+    var plugs = {};
     var pluginsRouteIndex = function (req, res, next) {
-        if (req.params && plugs[req.params.name]) {
-            console.log(req.params);
-            next();
-        } else {
-            next();
+        var indexpath, identifier, params = req.params;
+        if (params && (identifier = params.identifier)) {
+            req.addPluginDist = true;
         }
+        next();
     };
-    _.each({
-        '/plugins/:name': pluginsRouteIndex,
-        '/plugins': pluginsRoute
-    }, function (handler, key) {
-        app.use(pattern + key, handler);
-        app.use(key, handler);
+    app.use(path.join(pattern, 'assets'), assetsRoute);
+    app.use(path.join(pattern, 'plugins/:identifier/'), pluginsRouteIndex);
+    app.use(path.join(pattern, 'panels/plugins/:identifier/'), pluginsRouteIndex);
+    app.use('/plugins/:identifier/', pluginsRouteIndex);
+    app.use(function (req, res, next) {
+        var identifier, plug, plugs, splitUrl, company, name, params = req.params;
+        if (req.addPluginDist) {
+            // identifier = params.identifier;
+            splitUrl = req.url.split('/plugins/');
+            splitUrl = ('/plugins/' + splitUrl.slice(1).join('/plugins/')).split('/');
+            splitUrl.splice(3, 0, 'dist');
+            identifier = splitUrl[2];
+            plug = utils.knownPlugins[identifier];
+            splitUrl.splice(2, 1, plug.company, plug.name);
+            req.url = splitUrl.join('/');
+        }
+        next();
     });
-    app.use(pattern + '/assets', assetsRoute);
-    app.use(pattern, function (req, res, next) {
+    app.use('/plugins/:company/:name/', function (req, res, next) {
+        if (req.url === '/dist/') {
+            req.url = '/dist/index.js';
+        }
+        // var splitUrl = req.url.split('/');
+        // var plugs = utils.knownPlugins;
+        // console.log(plugs, params, identifier);
+        // var plug = plugs[identifier];
+        // var company = plug.company;
+        // var name = plug.name;
+        // splitUrl.splice(1, 1, company, name);
+        // req.url = splitUrl.join('/');
+        // splitUrl[1] = plugs[splitUrl[1]];
+        next();
+    });
+    // app.use('/plugins', function (req, res, next) {
+    //     next();
+    // });
+    var pluginTemplate = jetpack.read(path.join(process.cwd(), 'templates/plugins.js'));
+    app.get('/plugins/**/*.js', function (req, res, next) {
+        var split = req.url.split('/');
+        var plugin = _.find(utils.knownPlugins, function (plugin, id) {
+            return plugin.company === split[2] && plugin.name === split[3];
+        });
+        fs.readFile(path.join(process.cwd(), req.url), function (err, contents) {
+            if (err) {
+                return next();
+            }
+            res.send(contents.toString().replace('__PLUGIN_ID__', plugin.id));
+        });
+    });
+    app.use('/plugins', pluginsRoute);
+    app.use(path.join(pattern, '/assets'), assetsRoute);
+    app.use(path.join(pattern, '/panels/assets'), assetsRoute);
+    app.use(path.join(pattern, '/panels'), function (req, res, next) {
         var parsed_url = url.parse(req.url);
         if ((pathnamesplit = parsed_url.pathname.split('.'))[pathnamesplit.length - 1] === 'html') {
             renderComponent(component, req.url, function (err, html) {
@@ -157,7 +277,6 @@ gulp.task('listen', function () {
             return componentsStatic.apply(this, arguments);
         }
     });
-    app.use('/content/:content_id/:version?/:alternater?/assets', assetsRoute);
     app.use('/settings', express.static(path.join(currentProjectDir, cascade.settingsFileName)));
     app.get('/json/panels', function (req, res, next) {
         var adJSON, params = req.query;
@@ -172,7 +291,8 @@ gulp.task('listen', function () {
                 if (!parts.length) {
                     res.send({
                         settings: adJSON,
-                        parts: {}
+                        parts: {},
+                        plugins: {}
                     });
                 } else {
                     _.each(partsHash, function (obj, key) {
@@ -205,7 +325,8 @@ gulp.task('listen', function () {
                     delete adJSON.components;
                     res.send({
                         settings: adJSON,
-                        parts: partsHash
+                        parts: partsHash,
+                        plugins: utils.knownPlugins
                     });
                 }
             }
@@ -279,7 +400,7 @@ gulp.task('listen', function () {
         }));
     });
     app.use(function (req, res, next) {
-        console.log(req.url);
+        console.log("404: " + req.url);
         res.status(404);
         res.send(new Error('not found'));
     });

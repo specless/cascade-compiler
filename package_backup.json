@@ -81,7 +81,7 @@
             "js": true,
             "assets": true
         },
-        "pluginsFolder": "/plugins/plugs",
+        "pluginsFolder": "/plugins/specless",
         "userPluginsFolder": "/Users/scorby/Library/Application Support/specless-cascade/Plugins",
         "currentProjectDir": "/Users/michaelmclaughlin/Sites/specless/ads/624_test",
         "buildDir": ".output",

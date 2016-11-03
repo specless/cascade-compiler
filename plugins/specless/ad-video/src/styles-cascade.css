@@ -36,11 +36,11 @@
 	min-width: 50px;
 	min-height: 50px;
 	position: relative;
-	width: 320rem;
-	height: 180rem;
+	width: 320spx;
+	height: 180spx;
 	background-color: #000000;
 	display: inline-block;
-	-ad-video-control-bar-color : rgba(13, 10, 10, 0.3);
+	-ad-video-control-bar-color: rgba(13, 10, 10, 0.3);
 
 	::-ad-video-control-bar {
 		z-index: 2;
@@ -56,7 +56,7 @@
 
 	video {
 		background-color: transparent;
-		&::--webkit-media-controls-play-button {
+		&::-webkit-media-controls-play-button {
 		  display: none!important;
 		  -webkit-appearance: none;
 		}

@@ -105,6 +105,21 @@ module.exports = {
         }
         return foundComponent;
     },
+    addImports: function (component, _imports) {
+        var imports = _imports || [];
+        this.component(component, function (component) {
+            var sanitized = component.imports || [];
+            _.each(imports, function (imprt) {
+                if (_.find(sanitized, function (imported) {
+                        return _.isEqual(imported, imprt);
+                    })) {
+                    return;
+                }
+                sanitized.push(JSON.parse(JSON.stringify(imprt)));
+            });
+            component.imports = sanitized;
+        });
+    },
     dumpSettings: function (dump) {
         var components = this.projectSettings.copy().components;
         _.each(dump && dump.components, function (data, key) {
@@ -278,93 +293,102 @@ module.exports = {
     },
     markComponent: function (type) {
         function transform(file, cb) {
-            var prepend = '';
-            var component = file.relative.split('.')[0];
-            // if (type === 'html') {
-            //     prepend = '<!-- ' + component + ' -->\n';
-            // } else if (type === 'css' || type === 'js') {
-            //     prepend = '/* ' + component + ' */\n';
-            // }
-            file.contents = new Buffer(prepend + String(file.contents));
+            // var prepend = '';
+            // var component = file.relative.split('.')[0];
+            // // if (type === 'html') {
+            // //     prepend = '<!-- ' + component + ' -->\n';
+            // // } else if (type === 'css' || type === 'js') {
+            // //     prepend = '/* ' + component + ' */\n';
+            // // }
+            // file.contents = new Buffer(prepend + String(file.contents));
             cb(null, file);
         }
         return require('event-stream').map(transform);
     },
-    getPlugins: function (type) {
+    knownPlugins: {},
+    getPlugins: function () {
         var settings = this.compilerSettings.copy();
-        var plugins = settings.plugins;
-        var pluginsDir = settings.pluginsFolder + '/';
+        var pluginSettings = settings.plugin || {};
+        var pluginsDir = pluginSettings.root;
+        var companies = pluginSettings.companies;
         var matches = [];
-        _.each(plugins, function (plugin) {
-            var plugPath = path.join('.', pluginsDir, plugin, '/package.json');
-            var pluginSettings = jetpack.read(plugPath, 'json')['specless-cascade-plugin'];
-            _.each(pluginSettings.triggers, function (pluginItem) {
-                if (pluginItem.type === type) {
-                    var trigger = pluginItem;
-                    trigger.parentPlugin = plugin;
-                    if (trigger.tag === undefined && trigger.type === 'element') {
-                        trigger.tag = 'div';
-                    }
-                    trigger.path = pluginsDir + trigger.parentPlugin;
-                    matches.push(trigger);
+        var utils = this;
+        var collectPlugins = function (company) {
+            if (!company) {
+                return;
+            }
+            var dir = path.join(process.cwd(), pluginsDir, company);
+            var tree = jetpack.inspectTree(dir);
+            _.each(tree.children, function (plugin) {
+                if (plugin.type !== 'dir') {
+                    return;
                 }
+                var plugPath = path.join(dir, plugin.name, '/settings/index.js');
+                var pluginSettings = require(plugPath);
+                matches.push(pluginSettings);
+                // console.log(pluginSettings);
+                utils.knownPlugins[pluginSettings.id] = pluginSettings;
             });
-        });
-        matches = _.uniq(matches);
-        return matches;
+        };
+        _.each(companies, collectPlugins);
+        // once again at the end for user plugins
+        collectPlugins();
+        return _.uniq(matches);
     },
     addDeps: function (object, newObject, basePath) {
         var cascade = this.compilerSettings.copy();
         var whiteList = compilerSettings.js.whiteListedDeps;
-        if (newObject) {
-            if (newObject.css) {
-                _.each(newObject.css, function (dep) {
-                    object.css.push(compilerSettings.path + basePath + '/' + dep);
-                    object.css = _.uniq(object.css);
-                });
-            }
-            if (newObject.jsPlugins) {
-                _.each(newObject.jsPlugins, function (dep) {
-                    object.jsPlugins.push(compilerSettings.path + basePath + '/' + dep);
-                    object.jsPlugins = _.uniq(object.jsPlugins);
-                });
-            }
-            if (newObject.js) {
-                _.each(newObject.js, function (dep) {
-                    var whiteListed = false;
-                    _.each(whiteList, function (script) {
-                        if (dep === script.name) {
-                            object.jsWhiteList.push(dep);
-                            object.jsWhiteList = _.uniq(object.jsWhiteList);
-                            whiteListed = true;
-                        }
-                    });
-                    if (whiteListed === false) {
-                        var depPath = basePath + '/' + dep;
-                        var projectTest = depPath.split("$$$PROJECT$$$");
-                        if (projectTest.length > 1) {
-                            depPath = compilerSettings.currentProjectDir + projectTest[1];
-                        } else {
-                            depPath = compilerSettings.path + depPath;
-                        }
-                        object.js.push(depPath);
-                        object.js = _.uniq(object.js);
+        if (!newObject) {
+            return object;
+        }
+        if (newObject.css) {
+            _.each(newObject.css, function (dep) {
+                object.css.push(compilerSettings.path + basePath + '/' + dep);
+                object.css = _.uniq(object.css);
+            });
+        }
+        if (newObject.jsPlugins) {
+            _.each(newObject.jsPlugins, function (dep) {
+                object.jsPlugins.push(compilerSettings.path + basePath + '/' + dep);
+                object.jsPlugins = _.uniq(object.jsPlugins);
+            });
+        }
+        if (newObject.js) {
+            _.each(newObject.js, function (dep) {
+                var whiteListed = false;
+                _.each(whiteList, function (script) {
+                    if (dep === script.name) {
+                        object.jsWhiteList.push(dep);
+                        object.jsWhiteList = _.uniq(object.jsWhiteList);
+                        whiteListed = true;
                     }
                 });
-            }
-            if (newObject.dataSources) {
-                _.each(newObject.dataSources, function (dep) {
-                    object.dataSources.push(dep);
-                    object.dataSources = _.uniq(object.dataSources);
-                });
-            }
-            if (newObject.jsSnippets) {
-                _.each(newObject.jsSnippets, function (dep) {
-                    object.jsSnippets.push(dep);
-                    object.jsSnippets = _.uniq(object.jsSnippets);
-                });
-            }
+                if (whiteListed === false) {
+                    var depPath = basePath + '/' + dep;
+                    var projectTest = depPath.split("$$$PROJECT$$$");
+                    if (projectTest.length > 1) {
+                        depPath = compilerSettings.currentProjectDir + projectTest[1];
+                    } else {
+                        depPath = compilerSettings.path + depPath;
+                    }
+                    object.js.push(depPath);
+                    object.js = _.uniq(object.js);
+                }
+            });
         }
+        if (newObject.dataSources) {
+            _.each(newObject.dataSources, function (dep) {
+                object.dataSources.push(dep);
+                object.dataSources = _.uniq(object.dataSources);
+            });
+        }
+        if (newObject.jsSnippets) {
+            _.each(newObject.jsSnippets, function (dep) {
+                object.jsSnippets.push(dep);
+                object.jsSnippets = _.uniq(object.jsSnippets);
+            });
+        }
+        // }
         return object;
     },
     snakeToCamel: function (s) {

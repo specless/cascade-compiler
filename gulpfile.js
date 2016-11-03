@@ -33,7 +33,7 @@ gulp.task('open', ['clean'], function () {
 gulp.task('build', function () {
     // utils.sendMessage("Command Received: Build Project", null, 1);
     return q.Promise(function (success, failure) {
-        runSequence('open', 'recompile', function (err) {
+        runSequence('open', 'recompile', 'watch-plugins', function (err) {
             if (err) {
                 utils.sendMessage("There was an error building your project.", err.message, 3);
                 // utils.sendMessage("Command Completed: Build Project", null, 1);

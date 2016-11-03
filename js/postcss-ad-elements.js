@@ -8,7 +8,7 @@ module.exports = postcss.plugin('plugin-triggers', function (opts) {
         elementPrefix: '_ad-',
         propertyPrefix: '-ad-'
     };
-    var elements = utils.getPlugins('element');
+    var elements = utils.getPlugins();
     return function (css, result) {
         css.walk(function (node) {
             if (node.type === 'rule') {

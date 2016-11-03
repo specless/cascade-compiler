@@ -27,7 +27,6 @@ module.exports = function (element, utils, _) {
             exit: false,
             panorama: false
         };
-    console.log(element);
     copyTo = utils.compilerSettings.copy();
     copyFrom = utils.compilerSettings.copy();
     attrs = element.node.attrs;
@@ -87,4 +86,4 @@ module.exports = function (element, utils, _) {
     attrs['data-setup'] = JSON.stringify(videojsOptions);
     element.node.attrs = attrs;
     return element;
-}
+};

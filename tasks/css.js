@@ -10,7 +10,7 @@ var tap = require("gulp-tap");
 var path = require('path');
 var toBuffer = require("gulp-buffer");
 var globber = function (glob, syntax, dump, custom_fn, err_handler, finished_hander) {
-    var postcssBefore = [
+    var result, postcssBefore = [
         require('../js/postcss-ad-elements')(),
         require('postcss-sassy-mixins')({}),
         require('postcss-simple-vars'),
@@ -93,6 +93,15 @@ var globber = function (glob, syntax, dump, custom_fn, err_handler, finished_han
         .pipe(toBuffer()) //
         .pipe(postcss(postcssBefore)) //
         .pipe(postcss(postcssAfter)));
+    //  //
+    // .pipe((function () {
+    //     var through = require('through2'); // npm install --save through2
+    //     return through.obj(function (file, encoding, callback) {
+    //         return (finished_hander || function (file) {
+    //             callback(null, new Buffer(file.toString()));
+    //         })(file, encoding, callback);
+    //     });
+    // }())));
 };
 module.exports = {
     glob: globber,
