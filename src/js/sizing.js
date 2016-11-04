@@ -85,7 +85,7 @@
 }(function (parsed, maintainAspect, setDimensions) {
     var iframe = window.ad,
         size = parsed.size || 'full',
-        sizeList = size.split('by'),
+        sizeList = size.split(/by|\:/igm),
         width = sizeList[0],
         height = sizeList[1] || width,
         widthIsAspect = +width === +width,
