@@ -16,12 +16,15 @@
         (function() {
             var app = specless.scope();
             var params = app.parseSearch(window);
-            params.panels = app.global.map(params.panels, function (panel, idx) {
+            params.panels = params.panels ? app.global.map(params.panels, function (panel, idx) {
                 return typeof panel === 'string' ? {
                     content_id: panel,
                     show: typeof params.show === 'string' ? params.show === panel : !idx
                 } : panel;
-            });
+            }) : [{
+                content_id: 'panel0',
+                show: true
+            }];
             app.load('000001', params);
         }());
     </script>
