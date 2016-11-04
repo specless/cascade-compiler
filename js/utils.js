@@ -54,7 +54,11 @@ module.exports = {
             _.extend(projectSettings, extension);
         },
         read: function () {
-            projectSettings = jetpack.read(this.settings(), 'json');
+            var settings = jetpack.read(this.settings(), 'json');
+            projectSettings = {
+                name: settings.name,
+                lastUpdated: settings.lastUpdated
+            };
         },
         write: function () {
             jetpack.write(this.settings(), projectSettings);
@@ -87,9 +91,15 @@ module.exports = {
     component: function (component, fn) {
         var settings = this.projectSettings.copy();
         var components = settings.components || [];
+        if (component === 'src') {
+            return {};
+        }
         var foundComponent = _.find(settings.components, function (com) {
             return com.name === component;
         });
+        if (component === 'src') {
+            console.trace();
+        }
         if (!foundComponent) {
             foundComponent = {
                 name: component,

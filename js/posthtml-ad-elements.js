@@ -80,6 +80,7 @@ module.exports = function (opts_) {
             if (node.tag.slice(0, 3) !== 'ad-') {
                 return node;
             }
+            console.log(node.tag);
             var plugin = findPlugin(node.tag);
             var imprts = createImports(plugin);
             imports = imports.concat(imprts);

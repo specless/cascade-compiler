@@ -23,10 +23,14 @@ var PluginError = gutil.PluginError;
 var argv = require('yargs').argv;
 var gulpEjs = require('gulp-ejs');
 gulp.task('recompile', function (cb) {
-    runSequence('plugins', ['html', 'css', 'js'], function () {
+    runSequence(['plugins', 'wipe'], ['html', 'css', 'js'], function () {
         utils.projectSettings.write();
         cb();
     });
+});
+gulp.task('wipe', function (cb) {
+    utils.projectSettings.read();
+    cb();
 });
 gulp.task('watch-plugins', function () {
     gulp.watch(['./plugins/**/src/**/*', '!./plugins/**/dist/**/*'], ['plugins']);
