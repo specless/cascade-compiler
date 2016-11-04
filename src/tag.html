@@ -5,7 +5,7 @@
 <script type="text/javascript">
     (function() {
         var app = specless.scope();
-        var hash = window.location.hash.slice(1);
+        var hash = window.top.location.hash.slice(1);
         var params = hash ? app.wraptry(function() {
             return JSON.parse(hash);
         }) || {} : {};
