@@ -97,9 +97,6 @@ module.exports = {
         var foundComponent = _.find(settings.components, function (com) {
             return com.name === component;
         });
-        if (component === 'src') {
-            console.trace();
-        }
         if (!foundComponent) {
             foundComponent = {
                 name: component,

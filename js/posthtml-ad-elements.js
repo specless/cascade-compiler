@@ -26,11 +26,11 @@ module.exports = function (opts_) {
     };
     var createImports = function (plugin_, tree_) {
         var plugin = plugin_,
-            identifier = plugin && plugin.id || plugin.name,
+            identifier = plugin && (plugin.id || plugin.name),
             company = plugin && plugin.company || 'specless',
             dependencies = plugin && plugin.dependencies,
             assets = plugin && plugin.assets;
-        return _.map(dependencies.defaults, function (imprt) {
+        return !dependencies ? [] : _.map(dependencies.defaults, function (imprt) {
             return _.foldl(imprt, function (memo, list, type) {
                 var typeHash = assets && assets[type];
                 memo[type] = _.foldl(list, function (memo, item) {
@@ -80,7 +80,6 @@ module.exports = function (opts_) {
             if (node.tag.slice(0, 3) !== 'ad-') {
                 return node;
             }
-            console.log(node.tag);
             var plugin = findPlugin(node.tag);
             var imprts = createImports(plugin);
             imports = imports.concat(imprts);

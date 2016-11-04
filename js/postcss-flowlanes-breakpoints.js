@@ -84,8 +84,6 @@ module.exports = postcss.plugin('flowlanes-breakpoints', function (opts) {
                 understandLayout(node, layouts);
             }
         });
-        // console.log(layouts);
-        // utils.makeComponent(opts.dump, file.component).layouts = layouts;
         utils.component(file.component, function (component) {
             component.layouts = layouts;
         });
