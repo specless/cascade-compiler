@@ -21,6 +21,7 @@ var q = require('q');
 var jetpack = require('fs-jetpack');
 var PluginError = gutil.PluginError;
 var argv = require('yargs').argv;
+var gulpEjs = require('gulp-ejs');
 gulp.task('recompile', function (cb) {
     runSequence('plugins', ['html', 'css', 'js'], function () {
         utils.projectSettings.write();
@@ -33,7 +34,9 @@ gulp.task('watch-plugins', function () {
 var fse = require('fs-extra');
 var argv = require('yargs').argv;
 gulp.task('preview-build', function () {
-    gulp.src('./src/**/*').pipe(gulp.dest('./dist'));
+    gulp.src('./src/**/*') //
+        .pipe(gulpEjs()) //
+        .pipe(gulp.dest('./dist'));
 });
 gulp.task('plugins', function () {
     var cascade = utils.compilerSettings.copy();
@@ -117,7 +120,6 @@ var string_src = function (filename, string) {
     return src;
 };
 gulp.task('listen', function () {
-    // utils.sendMessage("Command Received: Start Server and Listen for Changes", null, 1);
     var cascade = utils.compilerSettings.copy();
     var settings = utils.projectSettings.copy();
     var currentProjectDir = cascade.currentProjectDir;
