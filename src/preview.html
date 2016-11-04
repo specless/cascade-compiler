@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/basics.css">
+    <link rel="stylesheet" href="css/sizes.css">
+</head>
+<body>
+    <script type="text/javascript">window.__tsmp=+(new Date());</script>
+    <link rel="dns-prefetch" href="https://c.specless.io">
+    <link rel="preconnect" href="https://c.specless.io" crossorigin>
+    <script type="text/javascript" src="http://s.specless.io/frame/2/scripts/csf_6-2-4_build_specless-local"></script>
+    <script type="text/javascript">
+        (function() {
+            var app = specless.scope();
+            var params = app.parseSearch(window);
+            params.panels = app.global.map(params.panels, function (panel, idx) {
+                return typeof panel === 'string' ? {
+                    content_id: panel,
+                    show: typeof params.show === 'string' ? params.show === panel : !idx
+                } : panel;
+            });
+            app.load('000001', params);
+        }());
+    </script>
+</body>
+</html>

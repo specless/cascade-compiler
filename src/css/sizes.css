@@ -1,0 +1,20 @@
+.size-300x250 {
+    height: 250px;
+    width: 300px;
+}
+.size-728x90 {
+    height: 90px;
+    width: 728px;
+}
+.size-970x90 {
+    height: 90px;
+    width: 970px;
+}
+.size-fullx90 {
+    height: 90px;
+    width: 100%;
+}
+.size-fullxfull {
+    height: 100%;
+    width: 100%;
+}

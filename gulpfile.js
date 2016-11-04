@@ -3,6 +3,7 @@ var utils = require('./js/utils.js');
 var runSequence = require('run-sequence');
 var prompt = require('gulp-prompt');
 var q = require('q');
+var open = require('gulp-open');
 utils.compilerSettings.set({
     path: __dirname
 });
@@ -48,7 +49,11 @@ gulp.task('build', function () {
     });
 });
 gulp.task('start', [], function (cb) {
-    runSequence('build', 'listen', /*'open-browser',*/ function () {
+    runSequence(['build', 'preview-build'], 'listen', function () {
+        gulp.src(__filename).pipe(open({
+            uri: 'http://localhost:8787/preview'
+        }));
         gulp.watch(utils.projectSettings.allFiles(), ['recompile']);
+        cb();
     });
 });

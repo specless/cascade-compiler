@@ -32,6 +32,9 @@ gulp.task('watch-plugins', function () {
 });
 var fse = require('fs-extra');
 var argv = require('yargs').argv;
+gulp.task('preview-build', function () {
+    gulp.src('./src/**/*').pipe(gulp.dest('./dist'));
+});
 gulp.task('plugins', function () {
     var cascade = utils.compilerSettings.copy();
     var plugin = cascade.plugin;
@@ -399,6 +402,8 @@ gulp.task('listen', function () {
             cb(null, file);
         }));
     });
+    app.use(require('express-tension')('./dist'));
+    app.use(express.static('./dist'));
     app.use(function (req, res, next) {
         console.log("404: " + req.url);
         res.status(404);
