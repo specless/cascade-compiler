@@ -30,11 +30,11 @@ module.exports = {
     },
     "dependencies": {
         "defaults": [{
-            "js": ["video-js"],
+            "js": ["video-js", "index"],
             "css": ["video-js", "generic", "styles"]
         }],
         "panoramic": [{
-            "js": ["video-js", "three-js", "pano-wrapper"],
+            "js": ["video-js", "three-js", "index", "pano-wrapper"],
             "css": ["generic", "styles"]
         }]
     }

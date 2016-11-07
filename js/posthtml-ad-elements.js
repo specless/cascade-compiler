@@ -39,24 +39,23 @@ module.exports = function (opts_) {
                         asset = JSON.parse(JSON.stringify(item));
                     } else if (typeHash[item]) {
                         asset = JSON.parse(JSON.stringify(typeHash[item]));
+                    } else if (item === 'index') {
+                        asset = {
+                            src: '/'
+                        };
+                    }
+                    if (asset) {
                         if (!asset.id) {
                             asset.id = item;
                         }
-                    }
-                    if (asset) {
                         memo.push(asset);
                         fillUrl(asset, type, identifier);
-                        asset.id = company + '-' + identifier + '-' + type + '-' + asset.id;
+                        asset.id = identifier + '-' + type + '-' + asset.id;
                     }
                     return memo;
                 }, memo[type] || []);
                 return memo;
-            }, {
-                js: [fillUrl({
-                    src: '/',
-                    id: company + '-' + identifier + '-js-index-js'
-                }, 'js', identifier)]
-            });
+            }, {});
         });
     };
     return function (tree) {
