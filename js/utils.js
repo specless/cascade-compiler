@@ -54,7 +54,7 @@ module.exports = {
             _.extend(projectSettings, extension);
         },
         read: function () {
-            var settings = jetpack.read(this.settings(), 'json');
+            var settings = jetpack.read(this.settings(), 'json') || {};
             projectSettings = {
                 name: settings.name,
                 lastUpdated: settings.lastUpdated
