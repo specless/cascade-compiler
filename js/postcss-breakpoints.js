@@ -26,7 +26,8 @@ module.exports = postcss.plugin('breakpoints', function (opts_) {
     };
     var eachParam = function (params_, method) {
         var params = params_.trim();
-        return params && wrapParenthetically(_.map(params.split(/\)\s?,\s?\(/gm), function (parentheticalParams) {
+        var splitparams = params.split(/\)\s?,\s?\(/gm);
+        return params && wrapParenthetically(_.map(splitparams, function (parentheticalParams) {
             var paramsAndSplit = parentheticalParams.split(/\)\s?and\s?\(/gm);
             return wrapParenthetically(_.map(paramsAndSplit, function (param_) {
                 var direction, valSplit, valSplit0, param = removeQuotesAndParentheses(param_),
