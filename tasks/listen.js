@@ -286,6 +286,8 @@ gulp.task('listen', function () {
             return componentsStatic.apply(this, arguments);
         }
     });
+    app.use('/output', express.static(path.join(currentProjectDir, cascade.buildDir)));
+    app.use('/input', express.static(currentProjectDir));
     app.use('/settings', express.static(path.join(currentProjectDir, cascade.settingsFileName)));
     app.get('/json/panels', function (req, res, next) {
         var adJSON, params = req.query;
