@@ -1,23 +1,29 @@
-<script type="text/javascript">window.__tsmp=+(new Date());</script>
+<script type="text/javascript">
+window.__tsmp = +(new Date());
+</script>
 <link rel="dns-prefetch" href="https://c.specless.io">
 <link rel="preconnect" href="https://c.specless.io" crossorigin>
 <script type="text/javascript" src="https://s.specless.io/frame/2/scripts/csf_6-2-4_build_specless-compiler"></script>
+<script type="text/javascript" src="https://s.specless.io/frame/2/scripts/csf_6-2-4_build_library"></script>
 <script type="text/javascript">
-    (function() {
-        var app = specless.scope();
-        var hash = window.top.location.hash.slice(1);
-        var params = hash ? app.wraptry(function() {
-            return JSON.parse(hash);
-        }) || {} : {};
-        params.panels = params.panels ? app.global.map(params.panels, function (panel, idx) {
-            return typeof panel === 'string' ? {
-                content_id: panel,
-                show: typeof params.show === 'string' ? params.show === panel : !idx
-            } : panel;
-        }) : [{
-            content_id: 'panel0',
-            show: true
-        }];
-        app.load('000001', params);
-    }());
+specless.scope().definition(window);
+</script>
+<script type="text/javascript">
+(function() {
+    var app = specless.scope();
+    var hash = window.top.location.hash.slice(1);
+    var params = hash ? app.wraptry(function() {
+        return JSON.parse(hash);
+    }) || {} : {};
+    params.panels = params.panels ? app.global.map(params.panels, function(panel, idx) {
+        return typeof panel === 'string' ? {
+            content_id: panel,
+            show: typeof params.show === 'string' ? params.show === panel : !idx
+        } : panel;
+    }) : [{
+        content_id: 'panel0',
+        show: true
+    }];
+    app.loadAd('000001', params);
+}());
 </script>

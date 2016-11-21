@@ -1,5 +1,5 @@
 specless.content(window) //
-    .plugin("__PLUGIN_ID__", function (plugin, content, _, factories, documentView, scopedFactories, $) {
+    .plugin("__PLUGIN_ID__", function (plugin, content, _, factories, $) {
         var NULL = null,
             toggles = function (key, bool) {
                 return function (e) {
@@ -27,83 +27,35 @@ specless.content(window) //
                 return created;
             };
         content.loadAdElement('video').extend({
+            lifecycle: {
+                created: function () {
+                    console.log('created');
+                    var src = this.getAttribute('src');
+                    this.setAttribute('data-src', src);
+                },
+                attributeChanged: function () {
+                    console.log('attributeChange');
+                },
+                attached: function () {
+                    console.log('attached');
+                },
+                detached: function () {
+                    console.log('detached');
+                }
+            },
             events: {
-                click: 'toggle',
-                create: 'reset',
-                render: 'rebind'
+                click: 'clomp'
             },
-            unbind: function () {
-                var adVideo = this;
-                _.each(adVideo.ui, function (els) {
-                    els.each(function (el) {
-                        adVideo.stopListening(el);
-                    });
-                });
-                adVideo.ui = adVideo.selectUI();
-                return adVideo;
-            },
-            selectUI: function () {
-                return {
-                    video: this.$('video').item(0)
-                };
-            },
-            rebind: function () {
-                var adVideo = this;
-                adVideo.unbind();
-                adVideo.listenTo(adVideo.ui.video, {
-                    ended: 'restart'
-                });
-            },
-            pause: toggles('pause'),
-            play: toggles('play', true),
-            restart: function () {
-                this.pause();
-                this.seek(0);
-            },
-            seek: function (sets) {
-                var videoEl = this.ui.video.element(),
-                    read = videoEl.currentTime;
-                if (sets == NULL) {
-                    return read;
-                }
-                videoEl.currentTime = sets;
-                return this;
-            },
-            reset: function () {
-                var adVideo = this;
-                adVideo.data({
-                    interactive: true
-                });
-                adVideo.html(adVideo.template());
-                var doit = function () {
-                    videojs(adVideo.ui.video.element(), {}, function (e) {
-                        var registry = adVideo.directive('Registry');
-                        adVideo.vjs = this;
-                        registry.get('elements', 'vjs-overwrites', overwritevjsdimensions);
-                    });
-                };
-                _.Promise(function (s, f) {
-                    if (content.is('userJsRunning')) {
-                        doit();
-                    } else {
-                        content.on('userjs:running', doit);
-                    }
-                });
-            },
-            toggle: function () {
-                if (this.is('playing')) {
-                    return this.pause();
-                } else {
-                    return this.play();
-                }
-            },
-            template: function () {
-                return [
-                    ['video', {
-                        src: this.attr('src'),
-                        poster: this.attr('poster')
-                    }]
-                ];
+            methods: {
+                clomp: function () {
+                    console.log('clomped');
+                },
+                play: function () {}
             }
         });
     });
+// var item = DOMA('#idovadivdeo').item(0);
+// item.reset();
+// item.is('playing'); // true
+// item.reset(); //
+// item.is('playing'); // false

@@ -11,16 +11,17 @@ var path = require('path');
 var toBuffer = require("gulp-buffer");
 var globber = function (glob, syntax, dump, custom_fn, err_handler, finished_hander) {
     var result, postcssBefore = [
-        require('../js/postcss-ad-elements')(),
+        // require('../js/postcss-ad-comments'),
+        require('postcss-strip-inline-comments'),
         require('postcss-sassy-mixins')({}),
-        require('postcss-simple-vars'),
-        require('postcss-atroot'),
-        require('postcss-simple-extend'),
         require('postcss-conditionals'),
         require('postcss-each'),
         require('postcss-for'),
+        require('postcss-simple-vars'),
+        require('postcss-atroot'),
+        require('postcss-simple-extend'),
         require('postcss-custom-selectors'),
-        require("postcss-color-function"),
+        require('postcss-color-function'),
         require('postcss-nested')({
             bubble: syntax.contexts.concat([syntax.flowlane, syntax.breakpoint])
         }),
@@ -72,8 +73,7 @@ var globber = function (glob, syntax, dump, custom_fn, err_handler, finished_han
         require('postcss-assets'),
         require('autoprefixer'),
         require('../js/replace-rems.js')(),
-        require('../js/newline-comma.js')(),
-        require('postcss-discard-comments')
+        require('../js/newline-comma.js')()
     ];
     // var success = true;
     if (custom_fn) {
@@ -86,6 +86,8 @@ var globber = function (glob, syntax, dump, custom_fn, err_handler, finished_han
             errorHandler: function (error) {
                 utils.sendMessage("There was an error compiling your css.", error.message, 5);
                 this.successfullyCompiled = false;
+                error.showStack = true;
+                // console.trace(error);
                 console.log(error.stack);
                 return err_handler && err_handler(error);
             }

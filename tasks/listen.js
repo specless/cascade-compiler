@@ -199,16 +199,26 @@ gulp.task('listen', function () {
     var makeFullUrl = function (req) {
         return req.protocol + '://' + req.get('host') + req.url;
     };
-    var getUserHTML = function (component, url_, fn) {
-        return ejs.renderFile(path.join(cascade.currentProjectDir, component, 'index.html'), {
-            // url: parsed_url.origin,
-            component: component
-        }, function (e) {
-            return fn && fn.apply(this, arguments);
+    var getUserHTML = function (component, url_) {
+        return q.Promise(function (success, failure) {
+            ejs.renderFile(path.join(cascade.currentProjectDir, component, 'index.html'), {
+                // url: parsed_url.origin,
+                component: component
+            }, makePromiseHandler(success, failure));
         });
     };
-    var getAdJSON = function (fn) {
-        fs.readFile(path.join(currentProjectDir, cascade.settingsFileName), fn);
+    var makePromiseHandler = function (success, failure) {
+        return function (err, result) {
+            if (err) {
+                return failure(err);
+            }
+            success(result);
+        };
+    };
+    var getAdJSON = function () {
+        return q.Promise(function (success, failure) {
+            fs.readFile(path.join(currentProjectDir, cascade.settingsFileName), makePromiseHandler(success, failure));
+        });
     };
     var assetsRoute = express.static(path.join(currentProjectDir, cascade.assetsDirName));
     var componentsStatic = express.static(path.join(currentProjectDir, cascade.buildDir));
@@ -219,7 +229,7 @@ gulp.task('listen', function () {
     var plugs = {};
     var pluginsRouteIndex = function (req, res, next) {
         var indexpath, identifier, params = req.params;
-        if (params && (identifier = params.identifier)) {
+        if (params && params.identifier) {
             req.addPluginDist = true;
         }
         next();
@@ -246,20 +256,8 @@ gulp.task('listen', function () {
         if (req.url === '/dist/') {
             req.url = '/dist/index.js';
         }
-        // var splitUrl = req.url.split('/');
-        // var plugs = utils.knownPlugins;
-        // console.log(plugs, params, identifier);
-        // var plug = plugs[identifier];
-        // var company = plug.company;
-        // var name = plug.name;
-        // splitUrl.splice(1, 1, company, name);
-        // req.url = splitUrl.join('/');
-        // splitUrl[1] = plugs[splitUrl[1]];
         next();
     });
-    // app.use('/plugins', function (req, res, next) {
-    //     next();
-    // });
     var pluginTemplate = jetpack.read(path.join(process.cwd(), 'templates/plugins.js'));
     app.get('/plugins/**/*.js', function (req, res, next) {
         var split = req.url.split('/');
@@ -289,86 +287,118 @@ gulp.task('listen', function () {
     app.use('/output', express.static(path.join(currentProjectDir, cascade.buildDir)));
     app.use('/input', express.static(currentProjectDir));
     app.use('/settings', express.static(path.join(currentProjectDir, cascade.settingsFileName)));
+    var makeHost = function (req) {
+        return req.protocol + '://' + req.hostname;
+    };
+    var findComponent = function (components, name) {
+        return _.findWhere(components, {
+            name: name
+        });
+    };
+    app.get('/json/panel/:ad_id/:panel_id', function (req, res, next) {
+        var params = req.params,
+            host = makeHost(req),
+            ad_id = params.ad_id,
+            panel_id = params.panel_id,
+            jsonPromise = getAdJSON(),
+            name = parseName(panel_id),
+            userHtmlPromise = getUserHTML(name, makeFullUrl(req));
+        q.all([jsonPromise, userHtmlPromise]).then(function (results) {
+            var json = results[0];
+            var string = json.toString();
+            var html = results[1].toString();
+            var adJSON = JSON.parse(string || '{}');
+            var foundComponent = findComponent(adJSON.components, name);
+            var component = {
+                name: name,
+                html: html
+            };
+            addImports(host, component, foundComponent);
+            res.send(component);
+        }).catch(function (e) {
+            res.status(500).send({});
+        });
+    });
+    var addImports = function (host, readComponent, jsonComponent) {
+        if (!readComponent || !jsonComponent) {
+            return;
+        }
+        _.extend(readComponent, {
+            base: host + ':8787/content/000000/vsn/randompath' + '000' + '/'
+        }, jsonComponent);
+        readComponent.imports = [{
+            css: [{
+                href: 'assets/base.css',
+                id: 'base-styles'
+            }]
+        }].concat(jsonComponent.imports, [{
+            css: [{
+                href: 'panels/' + readComponent.name + '.css',
+                id: 'user-styles'
+            }],
+            js: [{
+                src: 'panels/' + readComponent.name + '.js',
+                id: 'user-js'
+            }]
+        }]);
+    };
+    var parseName = function (part) {
+        return part.split('_')[2];
+    };
+    var addImportsToMany = function (host, partsHash, adJSON) {
+        _.each(partsHash, function (obj, key) {
+            var component = findComponent(adJSON.components, obj.name);
+            addImports(host, obj, component);
+        });
+    };
     app.get('/json/panels', function (req, res, next) {
         var adJSON, params = req.query;
         var parts = params.parts.split(',');
-        var i = 0;
-        var partsHash = {};
         var parsed_url = url.parse(req.url);
-        var trytosend = function () {
-            var partsLength = _.keys(partsHash).length;
-            if (adJSON && partsLength === parts.length) {
-                trytosend = _.noop;
-                if (!parts.length) {
-                    res.send({
-                        settings: adJSON,
-                        parts: {},
-                        plugins: {}
-                    });
-                } else {
-                    _.each(partsHash, function (obj, key) {
-                        if (!obj) {
-                            return;
-                        }
-                        var component = _.findWhere(adJSON.components, {
-                            name: obj.name
-                        });
-                        _.extend(obj, {
-                            base: req.protocol + '://' + req.hostname + ':8787/content/000000/vsn/randompath' + '000' + '/'
-                                // parseInt(Math.random() * 1000)
-                        }, component);
-                        obj.imports = [{
-                            css: [{
-                                href: 'assets/base.css',
-                                id: 'base-styles'
-                            }]
-                        }].concat(component.imports, [{
-                            css: [{
-                                href: 'panels/' + obj.name + '.css',
-                                id: 'user-styles'
-                            }],
-                            js: [{
-                                src: 'panels/' + obj.name + '.js',
-                                id: 'user-js'
-                            }]
-                        }]);
-                    });
-                    delete adJSON.components;
-                    res.send({
-                        settings: adJSON,
-                        parts: partsHash,
-                        plugins: utils.knownPlugins
-                    });
-                }
-            }
-        };
-        _.each(parts, function (part) {
-            var name = part.split('_')[2];
-            getUserHTML(name, makeFullUrl(req), function (err, html) {
-                if (err) {
-                    partsHash[part] = null;
-                    trytosend();
-                    return err;
-                }
-                partsHash[part] = {
-                    name: name,
-                    html: html
+        var host = makeHost(req);
+        q.all([getAdJSON()].concat(_.map(parts, function (part) {
+            var name = parseName(part),
+                full_url = makeFullUrl(req);
+            return getUserHTML(name, full_url);
+        }))).then(function (list) {
+            var json = JSON.parse(list[0].toString());
+            var html = list.slice(1);
+            var partsHash = _.reduce(parts, function (memo, part, index) {
+                memo[part] = {
+                    name: part.split('_')[2],
+                    html: html[index]
                 };
-                trytosend();
-            });
-        });
-        getAdJSON(function (err, file) {
-            if (err) {
-                console.log(err);
-                return err;
+                return memo;
+            }, {});
+            if (!list.length) {
+                res.send({
+                    settings: json,
+                    parts: {},
+                    plugins: {}
+                });
+            } else {
+                addImportsToMany(host, partsHash, json);
+                delete json.components;
+                res.send({
+                    settings: json,
+                    parts: partsHash,
+                    plugins: utils.knownPlugins
+                });
             }
-            var split = parts[0].split('_');
-            var popped = split.pop();
-            var joined = split.join('_');
-            adJSON = JSON.parse(file.toString() || '{}');
-            trytosend();
+            // }
         });
-        trytosend();
+        // getAdJSON(function (err, file) {
+        //     if (err) {
+        //         console.log(err);
+        //         return err;
+        //     }
+        //     var split = parts[0].split('_');
+        //     var popped = split.pop();
+        //     var joined = split.join('_');
+        //     adJSON = JSON.parse(file.toString() || '{}');
+        //     trytosend();
+        // });
+        // trytosend();
     });
     app.post('/compiler/css', function (req, res, next) {
         var string = req.body && req.body.string;

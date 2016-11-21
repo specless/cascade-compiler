@@ -29,28 +29,35 @@ module.exports = postcss.plugin('flowlanes-breakpoints', function (opts) {
     var removeExtraneous = function (params) {
         return params.replace(/([\(\)])/g, '').trim();
     };
+    var retreive = function (list, index, defaults) {
+        return list ? (list.length > index ? list[index] : defaults) : defaults;
+    };
     var understandLayout = function (node, layouts) {
         var params = node.params;
         var layoutname = params.replace(/([\(\)])/g, '');
         _.each(layoutname.split(','), function (layoutname_) {
-            var layoutname = layoutname_.trim();
+            var layoutname = layoutname_.trim(),
+                layout = {
+                    name: layoutname
+                },
+                upScale = 1,
+                fulloverwrites = {
+                    height: true,
+                    width: true
+                },
+                upscale = function (item) {
+                    var converted = +item;
+                    return converted === converted ? upScale * item : item;
+                };
             if (!layoutname) {
                 return;
             }
-            var layout = {
-                name: layoutname
-            };
             if (_.find(layouts, function (layout) {
                     return layout.name === layoutname;
                 })) {
-                utils.exception('define-layout declarations cannot have the same name');
+                utils.exception('ad-layout declarations cannot have the same name');
                 // error... can't declarations with multiple names
             }
-            // if layout.name exists in the layout list, err out
-            var fulloverwrites = {
-                height: true,
-                width: true
-            };
             node.each(function (node) {
                 var lowercased, cameled, prop = node.prop;
                 var value = node.value;
@@ -66,11 +73,14 @@ module.exports = postcss.plugin('flowlanes-breakpoints', function (opts) {
                 }
                 layout[utils.snakeToCamel(prop)] = value;
             });
+            upScale = retreive(layout.scale, 0, 1);
+            layout.width = _.map(layout.width, upscale);
+            layout.height = _.map(layout.height, upscale);
             layout.name = layoutname;
             if (_.find(layouts, function (lt) {
                     return _.isEqual(lt.height, layout.height) && _.isEqual(lt.width, layout.width);
                 })) {
-                utils.exception('layouts cannot have the same dimensions / dimension ranges');
+                utils.exception('layouts cannot have the same dimensions / ranges');
                 // layouts cannot have the same dimension stipulations
             }
             // if layout does not have same sizes... push
@@ -111,6 +121,10 @@ module.exports = postcss.plugin('flowlanes-breakpoints', function (opts) {
     var toString = function (param) {
         return _.isString(param) ? param : param.join(' ');
     };
+    var validDefinitionNames = {
+        'ad-layout': true,
+        'define-layout': true
+    };
     return function (css, result) {
         var pathArray = css.source.input.file.split('/');
         var file = {
@@ -130,7 +144,7 @@ module.exports = postcss.plugin('flowlanes-breakpoints', function (opts) {
                     parsedParams.push(parsed);
                     name = 'auto-parsed' + (++count) + '';
                     node.parent.insertBefore(node, new postcss.atRule({
-                        name: 'define-layout',
+                        name: 'ad-layout',
                         params: '(' + name + ')',
                         nodes: [new postcss.decl({
                             prop: 'width',
@@ -146,7 +160,7 @@ module.exports = postcss.plugin('flowlanes-breakpoints', function (opts) {
             return node;
         });
         css.walkAtRules(function (node) {
-            if (node.name === 'define-layout') {
+            if (validDefinitionNames[node.name]) {
                 understandLayout(node, layouts);
             }
         });

@@ -41,7 +41,8 @@ module.exports = function (opts_) {
                         asset = JSON.parse(JSON.stringify(typeHash[item]));
                     } else if (item === 'index') {
                         asset = {
-                            src: '/'
+                            src: '/',
+                            id: 'index-js'
                         };
                     }
                     if (asset) {
@@ -52,6 +53,7 @@ module.exports = function (opts_) {
                         fillUrl(asset, type, identifier);
                         asset.id = identifier + '-' + type + '-' + asset.id;
                     }
+                    console.log(asset.id);
                     return memo;
                 }, memo[type] || []);
                 return memo;
@@ -144,9 +146,9 @@ module.exports = function (opts_) {
         //     });
         //     return node;
         //     // if (node === null) {
-        //     //    	delete node;
+        //     //       delete node;
         //     //    } else {
-        //     //    	return node;
+        //     //       return node;
         //     //    }
         // });
         // Next Process Ad Elements

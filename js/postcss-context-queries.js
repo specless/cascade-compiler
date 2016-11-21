@@ -49,9 +49,9 @@ module.exports = postcss.plugin('context-queries', function (opts) {
         var name = node.name;
         var params = node.params;
         var selector_group = [];
-        _.each(params.split(/\)\s?\,\s?\(/gm), function (param_group) {
+        params = params.split('\n').join('').split('\t').join('');
+        _.each(params.split(/\)\s*\,\s*\(/gm), function (param_group) {
             var selector = [];
-            // var clone = node.nodes.clone();
             _.each(param_group.split(/\)\s?and\s?\(/gm), function (rul, index) {
                 var joiner, attrSelector, prefix = '',
                     operator = _.find(opts.operators, function (operator) {
@@ -80,6 +80,7 @@ module.exports = postcss.plugin('context-queries', function (opts) {
                 }
                 feature = name + '-' + feature;
                 feature = prefix + feature;
+                feature = feature.trim();
                 cantHaveSpaces(feature, node.source);
                 var selector_ = [];
                 _.each(value.split(/\,\s+?/gm), function (value, index) {
