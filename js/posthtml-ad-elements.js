@@ -53,7 +53,6 @@ module.exports = function (opts_) {
                         fillUrl(asset, type, identifier);
                         asset.id = identifier + '-' + type + '-' + asset.id;
                     }
-                    console.log(asset.id);
                     return memo;
                 }, memo[type] || []);
                 return memo;
